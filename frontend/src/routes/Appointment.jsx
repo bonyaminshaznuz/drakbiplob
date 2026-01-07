@@ -25,7 +25,7 @@ const Appointment = () => {
 
     useEffect(() => {
         // Fetch available slots
-        fetch('http://localhost:8000/api/slots/')
+        fetch(`${import.meta.env.VITE_API_URL}/api/slots/`)
             .then(res => res.json())
             .then(data => {
                 setAvailableSlots(data);
@@ -67,7 +67,7 @@ const Appointment = () => {
         };
 
         try {
-            const response = await fetch('http://localhost:8000/api/appointments/', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/appointments/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ const Appointment = () => {
             setFilteredTimes([]);
 
             // Refresh slots
-            const slotsRes = await fetch('http://localhost:8000/api/slots/');
+            const slotsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/slots/`);
             const updatedSlots = await slotsRes.json();
             setAvailableSlots(updatedSlots);
 

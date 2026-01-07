@@ -29,7 +29,7 @@ const AppointmentEdit = () => {
     useEffect(() => {
         const fetchLatestData = async (id) => {
             try {
-                const res = await fetch(`http://localhost:8000/api/appointments/${id}/?t=${Date.now()}`);
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/appointments/${id}/?t=${Date.now()}`);
                 if (res.ok) {
                     const freshData = await res.json();
                     setAppointment(freshData);
@@ -43,7 +43,7 @@ const AppointmentEdit = () => {
         setMinDate(today);
 
         // Fetch available slots
-        fetch('http://localhost:8000/api/slots/')
+        fetch(`${import.meta.env.VITE_API_URL}/api/slots/`)
             .then(res => res.json())
             .then(data => {
                 setAvailableSlots(data);
@@ -132,7 +132,7 @@ const AppointmentEdit = () => {
         };
 
         try {
-            const response = await fetch(`http://localhost:8000/api/appointments/${appointment.id}/`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/appointments/${appointment.id}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ const AppointmentEdit = () => {
             setSuccessMessage('Your appointment details have been updated.');
 
             // Refresh slots
-            const slotsRes = await fetch('http://localhost:8000/api/slots/');
+            const slotsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/slots/`);
             const updatedSlots = await slotsRes.json();
             setAvailableSlots(updatedSlots);
 
@@ -175,7 +175,7 @@ const AppointmentEdit = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:8000/api/appointments/${appointment.id}/`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/appointments/${appointment.id}/`, {
                 method: 'DELETE',
             });
 

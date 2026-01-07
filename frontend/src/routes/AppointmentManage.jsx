@@ -17,7 +17,7 @@ const AppointmentManage = () => {
         setError(false);
 
         try {
-            const response = await fetch(`http://localhost:8000/api/appointments/${searchId.trim()}/?t=${Date.now()}`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/appointments/${searchId.trim()}/?t=${Date.now()}`);
             if (!response.ok) {
                 setError('Appointment not found. Please check the ID.');
                 return;
