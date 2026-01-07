@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0a5f51;
+  --color-primary-dark: #084840;
+  --color-primary-light: #0d7965;
+  --color-secondary: #e8825e;
+  --color-secondary-dark: #d97148;
+  --color-cream: #fef7f0;
+  --color-softcream: #fffbf7;
+  --color-accent: #f5a97f;
+  --font-sans: 'Poppins', 'Inter', sans-serif;
+}
+
+/* Custom mapping for the casing used in the HTML if needed, 
+   but ideally we should update the HTML classes to match kebab-case 
+   or alias them here if Tailwind v4 doesn't support camelCase in css vars directly mapping to classes.
+   
+   Actually, with v4, --color-primary-dark becomes class="text-primary-dark" or "bg-primary-dark".
+   The original HTML uses "primaryDark". 
+   To support "primaryDark" class, we might need to be careful.
+   Tailwind v4 theme variables usually map to kebab-case utilities.
+   
+   Let's try to alias the classes or just use the correct names in the JSX.
+   I will update the JSX to use the new names (e.g. primaryDark -> primary-dark).
+*/
