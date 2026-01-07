@@ -15,35 +15,99 @@ const AppointmentEdit = () => {
         fullName: '',
         phoneNumber: '',
         email: '',
-        appointmentDate: '',
-        appointmentTime: '',
+        slotId: '',
         reasonForVisit: '',
-        additionalNotes: ''
     });
 
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [filteredTimes, setFilteredTimes] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [availableDates, setAvailableDates] = useState([]);
+
     useEffect(() => {
+        const fetchLatestData = async (id) => {
+            try {
+                const res = await fetch(`http://localhost:8000/api/appointments/${id}/?t=${Date.now()}`);
+                if (res.ok) {
+                    const freshData = await res.json();
+                    setAppointment(freshData);
+                }
+            } catch (err) {
+                console.error("Error refreshing data:", err);
+            }
+        };
+
         const today = new Date().toISOString().split('T')[0];
         setMinDate(today);
+
+        // Fetch available slots
+        fetch('http://localhost:8000/api/slots/')
+            .then(res => res.json())
+            .then(data => {
+                setAvailableSlots(data);
+                // Extract unique dates
+                const dates = [...new Set(data.map(slot => slot.date))];
+                setAvailableDates(dates);
+            })
+            .catch(err => console.error("Error fetching slots:", err));
 
         // Get appointment from location state
         if (location.state && location.state.appointment) {
             const apt = location.state.appointment;
             setAppointment(apt);
             setFormData({
-                fullName: apt.fullName,
-                phoneNumber: apt.phoneNumber,
+                fullName: apt.full_name,
+                phoneNumber: apt.phone_number,
                 email: apt.email || '',
-                appointmentDate: apt.appointmentDate,
-                appointmentTime: apt.appointmentTime,
-                reasonForVisit: apt.reasonForVisit,
-                additionalNotes: apt.additionalNotes || ''
+                slotId: apt.slot,
+                reasonForVisit: apt.reason,
             });
+            setSelectedDate(apt.slot_details.date);
+
+            // Re-fetch fresh data from server to be sure status is up to date
+            fetchLatestData(apt.id);
         } else {
             // No appointment data, redirect
             alert('No appointment data found. Please search again.');
             navigate('/appointment-manage');
         }
     }, [location, navigate]);
+
+    useEffect(() => {
+        if (selectedDate && availableSlots.length > 0) {
+            const timesAtDate = availableSlots.filter(slot => slot.date === selectedDate);
+            // Include current slot in times if it's the one we are already booked for
+            if (appointment && appointment.slot_details.date === selectedDate) {
+                const alreadyBookedSlot = {
+                    id: appointment.slot,
+                    time: appointment.slot_details.time,
+                    date: appointment.slot_details.date
+                };
+                if (!timesAtDate.find(s => s.id === alreadyBookedSlot.id)) {
+                    timesAtDate.push(alreadyBookedSlot);
+                }
+            }
+            setFilteredTimes(timesAtDate);
+        }
+    }, [selectedDate, availableSlots, appointment]);
+
+    useEffect(() => {
+        if (availableSlots.length > 0 || appointment) {
+            let dates = [...new Set(availableSlots.map(slot => slot.date))];
+            if (appointment && !dates.includes(appointment.slot_details.date)) {
+                dates.push(appointment.slot_details.date);
+            }
+            setAvailableDates(dates.sort());
+        }
+    }, [availableSlots, appointment]);
+
+    const handleDateChange = (e) => {
+        const date = e.target.value;
+        setSelectedDate(date);
+        setFormData(prev => ({ ...prev, slotId: '' }));
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -53,29 +117,39 @@ const AppointmentEdit = () => {
         }));
     };
 
-    const handleUpdate = (e) => {
+    const handleUpdate = async (e) => {
         e.preventDefault();
-
         if (!appointment) return;
+        setLoading(true);
+        setError(null);
 
-        // Get appointments from localStorage
-        let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+        const payload = {
+            full_name: formData.fullName,
+            phone_number: formData.phoneNumber,
+            email: formData.email,
+            slot: formData.slotId,
+            reason: formData.reasonForVisit
+        };
 
-        // Find and update
-        const index = appointments.findIndex(apt => apt.id === appointment.id);
+        try {
+            const response = await fetch(`http://localhost:8000/api/appointments/${appointment.id}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
 
-        if (index !== -1) {
-            const updatedAppointment = {
-                ...appointments[index],
-                ...formData,
-                updatedAt: new Date().toISOString()
-            };
+            if (!response.ok) throw new Error('Failed to update appointment');
 
-            appointments[index] = updatedAppointment;
-            localStorage.setItem('appointments', JSON.stringify(appointments));
-
-            setAppointment(updatedAppointment);
+            const data = await response.json();
+            setAppointment(data);
             setSuccessMessage('Your appointment details have been updated.');
+
+            // Refresh slots
+            const slotsRes = await fetch('http://localhost:8000/api/slots/');
+            const updatedSlots = await slotsRes.json();
+            setAvailableSlots(updatedSlots);
 
             // Scroll to success message
             setTimeout(() => {
@@ -84,26 +158,36 @@ const AppointmentEdit = () => {
                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }, 100);
+        } catch (err) {
+            console.error("Update error:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleCancel = () => {
+    const handleCancel = async () => {
         if (!appointment) return;
 
         if (!window.confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
             return;
         }
 
-        let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-        const index = appointments.findIndex(apt => apt.id === appointment.id);
+        setLoading(true);
+        try {
+            const response = await fetch(`http://localhost:8000/api/appointments/${appointment.id}/`, {
+                method: 'DELETE',
+            });
 
-        if (index !== -1) {
-            appointments[index].status = 'Cancelled';
-            appointments[index].cancelledAt = new Date().toISOString();
+            if (!response.ok) throw new Error('Failed to cancel appointment');
 
-            localStorage.setItem('appointments', JSON.stringify(appointments));
-            setAppointment(appointments[index]);
             alert('Appointment has been cancelled successfully.');
+            navigate('/appointment-manage');
+        } catch (err) {
+            console.error("Cancel error:", err);
+            alert('Failed to cancel appointment. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -133,20 +217,26 @@ const AppointmentEdit = () => {
                             <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-6 border-b gap-4">
                                     <h2 className="text-2xl font-bold text-primary">Appointment Details</h2>
-                                    <div className={`px-4 py-2 rounded-full text-sm font-bold self-start sm:self-center ${appointment.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                                            appointment.status === 'Confirmed' ? 'bg-green-100 text-green-700' :
-                                                'bg-yellow-100 text-yellow-700'
+                                    <div className={`px-4 py-2 rounded-full text-sm font-bold self-start sm:self-center capitalize ${appointment.status?.toLowerCase() === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                        appointment.status?.toLowerCase() === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                            'bg-yellow-100 text-yellow-700'
                                         }`}>
                                         {appointment.status || 'Pending'}
                                     </div>
                                 </div>
+
+                                {error && (
+                                    <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                                        <i className="fas fa-exclamation-circle mr-2"></i>{error}
+                                    </div>
+                                )}
 
                                 <form onSubmit={handleUpdate}>
                                     <div className="space-y-6">
                                         {/* Appointment ID Display */}
                                         <div className="bg-cream p-4 rounded-lg">
                                             <p className="text-sm font-semibold text-gray-600 mb-1">Appointment ID</p>
-                                            <p className="text-xl font-bold text-primary">{appointment.id}</p>
+                                            <p className="text-xl font-bold text-primary">{appointment.formatted_id || appointment.id}</p>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -172,7 +262,7 @@ const AppointmentEdit = () => {
                                                 </label>
                                                 <input
                                                     type="date"
-                                                    value={appointment.dateOfBirth}
+                                                    value={appointment.date_of_birth}
                                                     readOnly
                                                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
                                                 />
@@ -212,15 +302,18 @@ const AppointmentEdit = () => {
                                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                                     <i className="fas fa-calendar text-primary mr-2"></i>Appointment Date *
                                                 </label>
-                                                <input
-                                                    type="date"
+                                                <select
                                                     name="appointmentDate"
-                                                    value={formData.appointmentDate}
-                                                    onChange={handleChange}
-                                                    min={minDate}
+                                                    value={selectedDate}
+                                                    onChange={handleDateChange}
                                                     required
                                                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none"
-                                                />
+                                                >
+                                                    <option value="">Select Date</option>
+                                                    {availableDates.map(date => (
+                                                        <option key={date} value={date}>{date}</option>
+                                                    ))}
+                                                </select>
                                             </div>
 
                                             {/* Appointment Time */}
@@ -229,27 +322,17 @@ const AppointmentEdit = () => {
                                                     <i className="fas fa-clock text-primary mr-2"></i>Preferred Time *
                                                 </label>
                                                 <select
-                                                    name="appointmentTime"
-                                                    value={formData.appointmentTime}
+                                                    name="slotId"
+                                                    value={formData.slotId}
                                                     onChange={handleChange}
                                                     required
-                                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none"
+                                                    disabled={!selectedDate}
+                                                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none disabled:bg-gray-100"
                                                 >
-                                                    <option value="">Select Time</option>
-                                                    <option value="09:00">09:00 AM</option>
-                                                    <option value="09:30">09:30 AM</option>
-                                                    <option value="10:00">10:00 AM</option>
-                                                    <option value="10:30">10:30 AM</option>
-                                                    <option value="11:00">11:00 AM</option>
-                                                    <option value="11:30">11:30 AM</option>
-                                                    <option value="14:00">02:00 PM</option>
-                                                    <option value="14:30">02:30 PM</option>
-                                                    <option value="15:00">03:00 PM</option>
-                                                    <option value="15:30">03:30 PM</option>
-                                                    <option value="16:00">04:00 PM</option>
-                                                    <option value="16:30">04:30 PM</option>
-                                                    <option value="17:00">05:00 PM</option>
-                                                    <option value="17:30">05:30 PM</option>
+                                                    <option value="">{selectedDate ? 'Select Time' : 'Select Date First'}</option>
+                                                    {filteredTimes.map(slot => (
+                                                        <option key={slot.id} value={slot.id}>{slot.time}</option>
+                                                    ))}
                                                 </select>
                                             </div>
                                         </div>
@@ -269,34 +352,24 @@ const AppointmentEdit = () => {
                                             ></textarea>
                                         </div>
 
-                                        {/* Additional Notes */}
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                <i className="fas fa-comment text-primary mr-2"></i>Additional Notes
-                                            </label>
-                                            <textarea
-                                                name="additionalNotes"
-                                                value={formData.additionalNotes}
-                                                onChange={handleChange}
-                                                rows="3"
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none"
-                                            ></textarea>
-                                        </div>
-
                                         {/* Action Buttons */}
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t">
                                             <button
                                                 type="submit"
-                                                className="bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                                                disabled={loading}
+                                                className="bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
                                             >
-                                                <i className="fas fa-save mr-2"></i>Update Appointment
+                                                <i className={`fas ${loading ? 'fa-spinner fa-spin' : 'fa-save'} mr-2`}></i>
+                                                {loading ? 'Updating...' : 'Update Appointment'}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={handleCancel}
-                                                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                                                disabled={loading}
+                                                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
                                             >
-                                                <i className="fas fa-times-circle mr-2"></i>Cancel Appointment
+                                                <i className={`fas ${loading ? 'fa-spinner fa-spin' : 'fa-times-circle'} mr-2`}></i>
+                                                {loading ? 'Cancelling...' : 'Cancel Appointment'}
                                             </button>
                                             <Link
                                                 to="/appointment-manage"

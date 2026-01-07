@@ -9,23 +9,31 @@ const AppointmentManage = () => {
     const [error, setError] = useState(false);
     const navigate = useNavigate();
 
-    const handleSearch = (e) => {
+    const [loading, setLoading] = useState(false);
+
+    const handleSearch = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError(false);
 
-        // Get appointments from localStorage
-        const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+        try {
+            const response = await fetch(`http://localhost:8000/api/appointments/${searchId.trim()}/?t=${Date.now()}`);
+            if (!response.ok) {
+                setError('Appointment not found. Please check the ID.');
+                return;
+            }
+            const data = await response.json();
 
-        // Find matching appointment
-        const foundAppointment = appointments.find(apt =>
-            apt.id === searchId.trim() && apt.dateOfBirth === searchDob
-        );
-
-        if (foundAppointment) {
-            // Store the found appointment temporarily (using sessionStorage as in original logic, or pass via state)
-            // Navigating to edit page with state is cleaner in React Router
-            navigate('/appointment-edit', { state: { appointment: foundAppointment } });
-        } else {
-            setError(true);
+            if (data.date_of_birth === searchDob) {
+                navigate('/appointment-edit', { state: { appointment: data } });
+            } else {
+                setError('Date of Birth does not match.');
+            }
+        } catch (err) {
+            console.error("Search error:", err);
+            setError('Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -65,7 +73,7 @@ const AppointmentManage = () => {
                                                 onChange={(e) => setSearchId(e.target.value)}
                                                 required
                                                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none"
-                                                placeholder="e.g., APT12345678"
+                                                placeholder="e.g., J01011990123"
                                             />
                                         </div>
 
@@ -88,9 +96,11 @@ const AppointmentManage = () => {
                                     <div className="flex gap-4">
                                         <button
                                             type="submit"
-                                            className="flex-1 bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white px-8 py-4 rounded-full text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                                            disabled={loading}
+                                            className="flex-1 bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white px-8 py-4 rounded-full text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
                                         >
-                                            <i className="fas fa-search mr-2"></i>Search Appointment
+                                            <i className={`fas ${loading ? 'fa-spinner fa-spin' : 'fa-search'} mr-2`}></i>
+                                            {loading ? 'Searching...' : 'Search Appointment'}
                                         </button>
                                     </div>
                                 </form>
@@ -101,9 +111,9 @@ const AppointmentManage = () => {
                                         <div className="flex items-start gap-3">
                                             <i className="fas fa-exclamation-circle text-red-500 text-xl mt-0.5"></i>
                                             <div>
-                                                <h3 className="text-lg font-bold text-red-800 mb-1">Appointment Not Found</h3>
+                                                <h3 className="text-lg font-bold text-red-800 mb-1">Search Error</h3>
                                                 <p className="text-red-700 text-sm">
-                                                    No appointment found with the provided ID and date of birth. Please check your details and try again.
+                                                    {error}
                                                 </p>
                                             </div>
                                         </div>

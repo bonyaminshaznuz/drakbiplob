@@ -9,20 +9,40 @@ const Appointment = () => {
         dateOfBirth: '',
         phoneNumber: '',
         email: '',
-        appointmentDate: '',
-        appointmentTime: '',
+        slotId: '', // Changed to slotId
         reasonForVisit: '',
-        additionalNotes: ''
     });
 
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [filteredTimes, setFilteredTimes] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const [availableDates, setAvailableDates] = useState([]);
     const [successData, setSuccessData] = useState(null);
     const [minDate, setMinDate] = useState('');
 
     useEffect(() => {
-        // Set minimum date to today
-        const today = new Date().toISOString().split('T')[0];
-        setMinDate(today);
+        // Fetch available slots
+        fetch('http://localhost:8000/api/slots/')
+            .then(res => res.json())
+            .then(data => {
+                setAvailableSlots(data);
+                // Extract unique dates
+                const dates = [...new Set(data.map(slot => slot.date))].sort();
+                setAvailableDates(dates);
+            })
+            .catch(err => console.error("Error fetching slots:", err));
     }, []);
+
+    const handleDateChange = (e) => {
+        const date = e.target.value;
+        setSelectedDate(date);
+        const timesAtDate = availableSlots.filter(slot => slot.date === date);
+        setFilteredTimes(timesAtDate);
+        setFormData(prev => ({ ...prev, slotId: '' })); // Reset slot when date changes
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -32,49 +52,67 @@ const Appointment = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError(null);
 
-        // Generate Appointment ID
-        const appointmentId = 'APT' + Date.now().toString().slice(-8);
-
-        // Create appointment object
-        const appointment = {
-            id: appointmentId,
-            ...formData,
-            status: 'Pending',
-            createdAt: new Date().toISOString()
+        const payload = {
+            full_name: formData.fullName,
+            date_of_birth: formData.dateOfBirth,
+            phone_number: formData.phoneNumber,
+            email: formData.email,
+            slot: formData.slotId, // This is the ID of the selected AvailableSlot
+            reason: formData.reasonForVisit
         };
 
-        // Get existing appointments from localStorage
-        const existingAppointments = JSON.parse(localStorage.getItem('appointments')) || [];
+        try {
+            const response = await fetch('http://localhost:8000/api/appointments/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
 
-        // Add new appointment
-        existingAppointments.push(appointment);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(JSON.stringify(errorData) || 'Failed to book appointment');
+            }
 
-        // Save to localStorage
-        localStorage.setItem('appointments', JSON.stringify(existingAppointments));
+            const data = await response.json();
 
-        // Show success message
-        setSuccessData({
-            id: appointmentId,
-            message: 'Your appointment has been scheduled. Please save your appointment ID for future reference.'
-        });
+            // Show success message
+            setSuccessData({
+                id: data.id,
+                formatted_id: data.formatted_id,
+                message: 'Your appointment has been scheduled successfully.'
+            });
 
-        // Reset form
-        setFormData({
-            fullName: '',
-            dateOfBirth: '',
-            phoneNumber: '',
-            email: '',
-            appointmentDate: '',
-            appointmentTime: '',
-            reasonForVisit: '',
-            additionalNotes: ''
-        });
+            // Reset form
+            setFormData({
+                fullName: '',
+                dateOfBirth: '',
+                phoneNumber: '',
+                email: '',
+                slotId: '',
+                reasonForVisit: '',
+            });
+            setSelectedDate('');
+            setFilteredTimes([]);
 
-        // Scroll to top or success message slightly
-        window.scrollTo({ top: 200, behavior: 'smooth' });
+            // Refresh slots
+            const slotsRes = await fetch('http://localhost:8000/api/slots/');
+            const updatedSlots = await slotsRes.json();
+            setAvailableSlots(updatedSlots);
+
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        } catch (err) {
+            console.error("Booking error:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -100,6 +138,28 @@ const Appointment = () => {
 
                             {/* Appointment Form */}
                             <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10">
+
+                                {/* Success Message */}
+                                {successData && (
+                                    <div className="mb-8 p-4 sm:p-6 bg-green-50 border-2 border-green-500 rounded-xl animate-fade-in">
+                                        <div className="flex items-start gap-3 sm:gap-4">
+                                            <div className="flex-shrink-0">
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-full flex items-center justify-center">
+                                                    <i className="fas fa-check text-white text-lg sm:text-xl"></i>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-lg sm:text-xl font-bold text-green-800 mb-2">Appointment Booked Successfully!</h3>
+                                                <p className="text-sm sm:text-base text-green-700 mb-3">{successData.message}</p>
+                                                <div className="bg-white p-3 sm:p-4 rounded-lg border border-green-300">
+                                                    <p className="text-xs sm:text-sm font-semibold text-gray-700 mb-1">Your Appointment ID:</p>
+                                                    <p className="text-xl sm:text-2xl font-bold text-primary">{successData.formatted_id || successData.id}</p>
+                                                    <p className="text-xs sm:text-sm text-gray-600 mt-2">Please keep this ID and your date of birth to view or update your appointment.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {/* Full Name */}
@@ -169,15 +229,18 @@ const Appointment = () => {
                                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                                 <i className="fas fa-calendar text-primary mr-2"></i>Appointment Date *
                                             </label>
-                                            <input
-                                                type="date"
+                                            <select
                                                 name="appointmentDate"
-                                                value={formData.appointmentDate}
-                                                onChange={handleChange}
-                                                min={minDate}
+                                                value={selectedDate}
+                                                onChange={handleDateChange}
                                                 required
                                                 className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none"
-                                            />
+                                            >
+                                                <option value="">Select Date</option>
+                                                {availableDates.map(date => (
+                                                    <option key={date} value={date}>{date}</option>
+                                                ))}
+                                            </select>
                                         </div>
 
                                         {/* Appointment Time */}
@@ -186,27 +249,17 @@ const Appointment = () => {
                                                 <i className="fas fa-clock text-primary mr-2"></i>Preferred Time *
                                             </label>
                                             <select
-                                                name="appointmentTime"
-                                                value={formData.appointmentTime}
+                                                name="slotId"
+                                                value={formData.slotId}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none"
+                                                disabled={!selectedDate}
+                                                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none disabled:bg-gray-100"
                                             >
-                                                <option value="">Select Time</option>
-                                                <option value="09:00">09:00 AM</option>
-                                                <option value="09:30">09:30 AM</option>
-                                                <option value="10:00">10:00 AM</option>
-                                                <option value="10:30">10:30 AM</option>
-                                                <option value="11:00">11:00 AM</option>
-                                                <option value="11:30">11:30 AM</option>
-                                                <option value="14:00">02:00 PM</option>
-                                                <option value="14:30">02:30 PM</option>
-                                                <option value="15:00">03:00 PM</option>
-                                                <option value="15:30">03:30 PM</option>
-                                                <option value="16:00">04:00 PM</option>
-                                                <option value="16:30">04:30 PM</option>
-                                                <option value="17:00">05:00 PM</option>
-                                                <option value="17:30">05:30 PM</option>
+                                                <option value="">{selectedDate ? 'Select Time' : 'Select Date First'}</option>
+                                                {filteredTimes.map(slot => (
+                                                    <option key={slot.id} value={slot.id}>{slot.time}</option>
+                                                ))}
                                             </select>
                                         </div>
                                     </div>
@@ -228,7 +281,7 @@ const Appointment = () => {
                                     </div>
 
                                     {/* Additional Notes */}
-                                    <div>
+                                    {/* <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                                             <i className="fas fa-comment text-primary mr-2"></i>Additional Notes
                                         </label>
@@ -240,15 +293,17 @@ const Appointment = () => {
                                             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none"
                                             placeholder="Any additional information you'd like to share"
                                         ></textarea>
-                                    </div>
+                                    </div> */}
 
                                     {/* Submit Button */}
                                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                                         <button
                                             type="submit"
-                                            className="flex-1 bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                                            disabled={loading}
+                                            className="flex-1 bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
                                         >
-                                            <i className="fas fa-check-circle mr-2"></i>Book Appointment
+                                            <i className={`fas ${loading ? 'fa-spinner fa-spin' : 'fa-check-circle'} mr-2`}></i>
+                                            {loading ? 'Booking...' : 'Book Appointment'}
                                         </button>
                                         <Link to="/appointment-manage" className="flex-1 bg-gradient-to-r from-secondary to-accent hover:from-accent hover:to-secondary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 text-center cursor-pointer">
                                             <i className="fas fa-search mr-2"></i>View Existing Appointment
@@ -256,25 +311,9 @@ const Appointment = () => {
                                     </div>
                                 </form>
 
-                                {/* Success Message */}
-                                {successData && (
-                                    <div className="mt-6 p-4 sm:p-6 bg-green-50 border-2 border-green-500 rounded-xl animate-fade-in">
-                                        <div className="flex items-start gap-3 sm:gap-4">
-                                            <div className="flex-shrink-0">
-                                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-full flex items-center justify-center">
-                                                    <i className="fas fa-check text-white text-lg sm:text-xl"></i>
-                                                </div>
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="text-lg sm:text-xl font-bold text-green-800 mb-2">Appointment Booked Successfully!</h3>
-                                                <p className="text-sm sm:text-base text-green-700 mb-3">{successData.message}</p>
-                                                <div className="bg-white p-3 sm:p-4 rounded-lg border border-green-300">
-                                                    <p className="text-xs sm:text-sm font-semibold text-gray-700 mb-1">Your Appointment ID:</p>
-                                                    <p className="text-xl sm:text-2xl font-bold text-primary">{successData.id}</p>
-                                                    <p className="text-xs sm:text-sm text-gray-600 mt-2">Please keep this ID and your date of birth to view or update your appointment.</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                {error && (
+                                    <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                                        <i className="fas fa-exclamation-circle mr-2"></i>{error}
                                     </div>
                                 )}
                             </div>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            background: #475569;
+            color: white;
+            padding: 30px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+
+        .content {
+            background: #f8fafc;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .alert-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: #ef4444;
+            color: white;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .details {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 20px;
+        }
+
+        .button {
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="margin:0;">Admin Notification</h2>
+        </div>
+        <div class="content">
+            <div class="alert-badge">System Alert</div>
+
+            <p>A new activity has occurred on the appointment system:</p>
+
+            <h3 style="color: #1e293b;">
+                Event:
+                {% if event_type == 'booked' %}New Booking
+                {% elif event_type == 'updated' %}Appointment Update
+                {% elif event_type == 'confirmed' %}Confirmation Sent
+                {% elif event_type == 'cancelled' %}Cancellation Notice
+                {% endif %}
+            </h3>
+
+            <div class="details">
+                <p><strong>Patient Name:</strong> {{ appointment.full_name }}</p>
+                <p><strong>ID:</strong> {{ formatted_id }}</p>
+                <p><strong>Phone:</strong> {{ appointment.phone_number }}</p>
+                <p><strong>Requested Date:</strong> {{ appointment.slot.date }}</p>
+                <p><strong>Requested Time:</strong> {{ appointment.slot.time }}</p>
+                <p><strong>Reason:</strong> {{ appointment.reason }}</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="http://localhost:8000/admin-panel/appointments/" class="button">Go to Admin Dashboard</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Drak Biplob Appointment System</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Manage Availability</h1>
+            <p class="text-sm text-gray-500 mt-1">Release new time slots or manage existing ones</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Release Form Section -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 md:p-7 lg:sticky lg:top-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm shadow-blue-50">
+                        <i class="fas fa-plus-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-gray-900 leading-tight">Release Slots</h2>
+                        <p class="text-[12px] text-gray-500 font-medium">Create new availability</p>
+                    </div>
+                </div>
+
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em] ml-1">1.
+                            Choose Dates</label>
+                        <div class="relative group">
+                            <i
+                                class="far fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                            <input type="text" id="datePicker" name="dates" placeholder="Pick dates..." required
+                                class="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm font-semibold placeholder:text-gray-400">
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center px-1">
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">2.
+                                Choose Times</label>
+                            <button type="button" id="selectAll"
+                                class="text-[10px] text-blue-600 hover:text-blue-700 font-bold px-3 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 transition-all uppercase tracking-wider shadow-sm shadow-blue-50/50">
+                                Select All
+                            </button>
+                        </div>
+
+                        <div class="bg-gray-50/50 rounded-2xl p-3 border border-gray-50">
+                            <div
+                                class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 max-h-48 overflow-y-auto overflow-x-hidden custom-scrollbar pr-2">
+                                {% for h in hours %}
+                                {% for m in minutes %}
+                                <label
+                                    class="time-label group relative flex items-center justify-center p-3 rounded-xl border border-white bg-white cursor-pointer hover:border-blue-200 hover:shadow-md transition-all duration-300">
+                                    <input type="checkbox" name="times" value="{{ h }}:{{ m }}"
+                                        class="time-checkbox hidden">
+                                    <span
+                                        class="text-[11px] font-bold text-gray-600 group-[.checked]:text-blue-600 group-hover:scale-110 transition-transform">
+                                        {% if h|add:"0" == 12 %}12:{{ m }} PM
+                                        {% elif h|add:"0" > 12 %}{{ h|add:"-12" }}:{{ m }} PM
+                                        {% else %}{{ h }}:{{ m }} AM
+                                        {% endif %}
+                                    </span>
+                                    <div
+                                        class="absolute inset-0 rounded-xl group-[.checked]:border-[2.5px] group-[.checked]:border-blue-500 group-[.checked]:bg-blue-50/20 pointer-events-none">
+                                    </div>
+                                </label>
+                                {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-blue-600 text-white rounded-2xl py-4 px-4 font-extrabold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-[0.98] flex items-center justify-center gap-3 group">
+                        <span>Release Selected Slots</span>
+                        <i class="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Existing Slots Section -->
+        <div class="lg:col-span-2">
+            <form id="bulkDeleteForm" method="POST" action="{% url 'admin-bulk-delete-slots' %}">
+                {% csrf_token %}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div
+                        class="px-6 py-6 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 backdrop-blur-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-500">
+                                <i class="fas fa-list-ul"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 leading-tight">Existing Slots</h3>
+                                <p class="text-[11px] text-gray-400 font-medium">Manage previously created slots</p>
+                            </div>
+                        </div>
+                        <button type="submit" onclick="return confirm('Delete selected slots?')"
+                            class="inline-flex items-center justify-center px-5 py-2.5 bg-red-50 text-red-700 text-[11px] font-bold rounded-xl hover:bg-red-100 transition-all active:scale-[0.98] shadow-sm shadow-red-50/50 uppercase tracking-widest gap-2">
+                            <i class="fas fa-trash-alt text-[10px]"></i>
+                            <span>Delete Selected</span>
+                        </button>
+                    </div>
+
+                    <!-- Scrollable Container for Slots -->
+                    <div class="max-h-[600px] overflow-y-auto overflow-x-hidden custom-scrollbar p-2 md:p-4">
+                        <!-- Desktop Table View -->
+                        <div class="hidden md:block">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="sticky top-0 bg-gray-50 z-10">
+                                    <tr class="border-b border-gray-100">
+                                        <th class="px-6 py-4">
+                                            <input type="checkbox" id="selectAllSlots"
+                                                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20">
+                                        </th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Date</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Time</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
+                                            Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    {% for slot in slots %}
+                                    <tr class="hover:bg-gray-50/50 transition-colors group">
+                                        <td class="px-6 py-4">
+                                            {% if not slot.is_booked %}
+                                            <input type="checkbox" name="slot_ids" value="{{ slot.id }}"
+                                                class="slot-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20">
+                                            {% else %}
+                                            <i class="fas fa-lock text-gray-300 text-xs"
+                                                title="Booked slots cannot be deleted here"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ slot.date }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">{{ slot.time }}</td>
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold {% if slot.is_booked %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
+                                                <span
+                                                    class="h-1.5 w-1.5 rounded-full mr-1.5 {% if slot.is_booked %}bg-red-500{% else %}bg-green-500{% endif %}"></span>
+                                                {% if slot.is_booked %}Booked{% else %}Available{% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            {% if not slot.is_booked %}
+                                            <a href="{% url 'admin-delete-slot' slot.id %}"
+                                                onclick="return confirm('Are you sure?')"
+                                                class="text-red-400 hover:text-red-600 transition-colors">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                            {% else %}
+                                            <span
+                                                class="text-[10px] px-2 py-1 bg-gray-50 text-gray-500 rounded-lg font-bold border border-gray-100"
+                                                title="{{ slot.appointment.full_name }}">
+                                                <i class="fas fa-user-check mr-1 text-[8px]"></i>
+                                                {{ slot.appointment.full_name|default:"Booked"|truncatechars:15 }}
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-12 text-center">
+                                            <div class="flex flex-col items-center">
+                                                <i class="fas fa-calendar-times text-3xl text-gray-200 mb-3"></i>
+                                                <h3 class="text-sm font-bold text-gray-900">No slots created yet</h3>
+                                                <p class="text-xs text-gray-500">Pick dates and times on the left to
+                                                    start.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Card View -->
+                        <div class="md:hidden divide-y divide-gray-100">
+                            {% for slot in slots %}
+                            <div class="p-4 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    {% if not slot.is_booked %}
+                                    <input type="checkbox" name="slot_ids" value="{{ slot.id }}"
+                                        class="slot-checkbox h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500/20">
+                                    {% else %}
+                                    <div class="h-5 w-5 flex items-center justify-center">
+                                        <i class="fas fa-lock text-gray-300 text-xs"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-bold text-gray-900">{{ slot.date }}</span>
+                                            <span
+                                                class="text-[10px] font-bold {% if slot.is_booked %}text-red-600 bg-red-50{% else %}text-green-600 bg-green-50{% endif %} px-2 py-0.5 rounded-full">
+                                                {% if slot.is_booked %}Booked{% else %}Available{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-0.5">
+                                            <i class="far fa-clock mr-1"></i> {{ slot.time }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    {% if not slot.is_booked %}
+                                    <a href="{% url 'admin-delete-slot' slot.id %}"
+                                        onclick="return confirm('Are you sure?')"
+                                        class="h-8 w-8 flex items-center justify-center rounded-lg bg-red-50 text-red-500">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                    {% else %}
+                                    <div
+                                        class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 flex items-center gap-1.5">
+                                        <i class="fas fa-user-check text-[8px]"></i>
+                                        {{ slot.appointment.full_name|default:"Booked"|truncatechars:15 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="p-12 text-center">
+                                <i class="fas fa-calendar-times text-3xl text-gray-200 mb-3"></i>
+                                <p class="text-sm font-bold text-gray-900">No slots created yet</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{ existing_slots|json_script:"existing-slots-data" }}
+    {{ full_dates|json_script:"disabled-dates-data" }}
+
+    <script>
+        // Checkbox styling logic
+        document.querySelectorAll('.time-checkbox').forEach(cb => {
+            cb.addEventListener('change', function () {
+                if (this.checked) {
+                    this.closest('.time-label').classList.add('checked', 'bg-blue-50', 'border-blue-500');
+                } else {
+                    this.closest('.time-label').classList.remove('checked', 'bg-blue-50', 'border-blue-500');
+                }
+            });
+        });
+
+        // Parse data from json_script tags
+        const existingSlots = JSON.parse(document.getElementById('existing-slots-data').textContent);
+        const disabledDates = JSON.parse(document.getElementById('disabled-dates-data').textContent);
+
+        flatpickr("#datePicker", {
+            mode: "multiple",
+            dateFormat: "Y-m-d",
+            minDate: "{{ min_date }}",
+            maxDate: "{{ max_date }}",
+            disable: disabledDates,
+            conjunction: ",",
+            onChange: function (selectedDates, dateStr, instance) {
+                const dates = dateStr.split(',');
+                const checkboxes = document.querySelectorAll('.time-checkbox');
+
+                // Reset all visibility
+                checkboxes.forEach(cb => {
+                    const label = cb.closest('label');
+                    label.style.display = 'flex';
+                    label.classList.remove('opacity-50', 'pointer-events-none');
+                });
+
+                if (dates.length > 0 && dates[0] !== "") {
+                    checkboxes.forEach(cb => {
+                        const time = cb.value;
+                        const exists = dates.some(d => {
+                            const dateKey = d.trim();
+                            return existingSlots[dateKey] && existingSlots[dateKey].includes(time);
+                        });
+
+                        if (exists) {
+                            const label = cb.closest('label');
+                            label.style.display = 'none';
+                            cb.checked = false;
+                            label.classList.remove('checked', 'bg-blue-50', 'border-blue-500');
+                        }
+                    });
+                }
+            }
+        });
+
+        document.getElementById('selectAll').addEventListener('click', function () {
+            const checkboxes = Array.from(document.querySelectorAll('.time-checkbox'))
+                .filter(cb => cb.closest('label').style.display !== 'none');
+
+            if (checkboxes.length === 0) return;
+
+            const allSelected = checkboxes.every(cb => cb.checked);
+            checkboxes.forEach(cb => {
+                cb.checked = !allSelected;
+                const label = cb.closest('.time-label');
+                if (cb.checked) label.classList.add('checked', 'bg-blue-50', 'border-blue-500');
+                else label.classList.remove('checked', 'bg-blue-50', 'border-blue-500');
+            });
+            this.textContent = allSelected ? 'Select All' : 'Deselect All';
+        });
+
+        document.getElementById('selectAllSlots').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('.slot-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</div>
+{% endblock %}

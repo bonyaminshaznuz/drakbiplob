@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex items-center gap-4">
+        <div
+            class="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
+            <i class="fas fa-envelope text-xl"></i>
+        </div>
+        <div>
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Mail Server Settings</h1>
+            <p class="text-sm text-gray-500 font-medium">Configure SMTP details for system notifications</p>
+        </div>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <form method="POST" class="p-6 md:p-8 space-y-6">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- SMTP Host -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase ml-1">SMTP Host</label>
+                    <input type="text" name="email_host" value="{{ config.email_host|default:'smtp.gmail.com' }}"
+                        required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 transition-all outline-none font-semibold">
+                </div>
+                <!-- SMTP Port -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase ml-1">SMTP Port</label>
+                    <input type="number" name="email_port" value="{{ config.email_port|default:587 }}" required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 transition-all outline-none font-semibold">
+                </div>
+                <!-- Email User -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase ml-1">Sender Email</label>
+                    <input type="email" name="email_host_user" value="{{ config.email_host_user|default:'' }}" required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 transition-all outline-none font-semibold">
+                </div>
+                <!-- App Password -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase ml-1">App Password</label>
+                    <input type="password" name="email_host_password" placeholder="Keep current password"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 transition-all outline-none font-semibold">
+                </div>
+                <!-- From Name -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase ml-1">From Name</label>
+                    <input type="text" name="default_from_email"
+                        value="{{ config.default_from_email|default:'Dr. Abul Khayer (Biplob) <mail@gmail.com>' }}"
+                        required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 transition-all outline-none font-semibold">
+                </div>
+                <!-- Admin Notification Email -->
+                <div class="col-span-full mt-4">
+                    <div class="bg-gray-50/50 p-6 rounded-2xl border border-dashed border-gray-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h3 class="text-sm font-bold text-gray-700">Admin Alert Configuration</h3>
+                        </div>
+                        <div class="space-y-2">
+                            <label
+                                class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Admin
+                                Alert Recipient Email</label>
+                            <input type="email" name="admin_email" value="{{ config.admin_email|default:'' }}" required
+                                class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-white focus:border-blue-500 transition-all outline-none font-semibold shadow-sm"
+                                placeholder="e.g. admin@example.com">
+                            <p class="text-[10px] text-gray-400 mt-1 ml-1 font-medium italic">* This address will
+                                receive copies of all user activities and system alerts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SSL/TLS Options -->
+            <div class="flex flex-col sm:flex-row gap-8 py-2 px-1">
+                <div class="flex items-center gap-3">
+                    {% if config.email_use_tls %}
+                    <input type="checkbox" name="email_use_tls" id="useTLS" checked
+                        class="h-5 w-5 rounded border-gray-300 text-blue-600">
+                    {% else %}
+                    <input type="checkbox" name="email_use_tls" id="useTLS"
+                        class="h-5 w-5 rounded border-gray-300 text-blue-600">
+                    {% endif %}
+                    <label for="useTLS" class="text-sm font-bold text-gray-700 cursor-pointer">Use TLS (Port
+                        587)</label>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if config.email_use_ssl %}
+                    <input type="checkbox" name="email_use_ssl" id="useSSL" checked
+                        class="h-5 w-5 rounded border-gray-300 text-blue-600">
+                    {% else %}
+                    <input type="checkbox" name="email_use_ssl" id="useSSL"
+                        class="h-5 w-5 rounded border-gray-300 text-blue-600">
+                    {% endif %}
+                    <label for="useSSL" class="text-sm font-bold text-gray-700 cursor-pointer">Use SSL (Port
+                        465)</label>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-6 border-t border-gray-50 flex gap-4">
+                <button type="submit"
+                    class="bg-blue-600 text-white rounded-2xl py-4 px-10 font-extrabold hover:bg-blue-700 shadow-xl shadow-blue-100 transition-all active:scale-95">
+                    Save Configuration
+                </button>
+                <a href="{% url 'admin-appointment-list' %}"
+                    class="bg-gray-50 text-gray-600 rounded-2xl py-4 px-10 font-bold hover:bg-gray-100 transition-all">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Note -->
+    <div class="bg-blue-50/50 rounded-2xl p-6 border border-blue-100 shadow-sm shadow-blue-50">
+        <div class="flex gap-4">
+            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div>
+                <h4 class="text-sm font-extrabold text-blue-900 mb-1">Configuration Tip</h4>
+                <p class="text-xs text-blue-700 leading-relaxed font-medium">
+                    Most modern services like Gmail and Outlook use Port 587 with TLS. If using Gmail, make sure to use
+                    an **App Password** created in your Google Account security settings.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
