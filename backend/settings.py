@@ -163,3 +163,17 @@ EMAIL_HOST_USER = 'mdshaznuz@gmail.com'
 EMAIL_HOST_PASSWORD = 'grev dkvd kjub ttzd'
 DEFAULT_FROM_EMAIL = 'Dr. Abul Khayer (Biplob) <mdshaznuz@gmail.com>'
 ADMIN_EMAIL = 'mdshaznuz@gmail.com'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'ERROR',
+    },
+}
