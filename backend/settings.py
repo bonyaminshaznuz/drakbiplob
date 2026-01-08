@@ -155,14 +155,14 @@ else:
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', f"Dr. Abul Khayer (Biplob) <{EMAIL_HOST_USER}>")
-ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', EMAIL_HOST_USER)
+EMAIL_HOST = 'in-v3.mailjet.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'c67608fe80dca2a45dd50feef7cf353d'
+EMAIL_HOST_PASSWORD = '4a8edee35cec2a9885a14b492a645325'
+DEFAULT_FROM_EMAIL = 'Dr Abul Khayer Biplob <appoinment@drakbiplob.com>'
+ADMIN_EMAIL = 'appoinment@drakbiplob.com'
 
 LOGGING = {
     'version': 1,

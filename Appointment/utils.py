@@ -10,27 +10,10 @@ def send_appointment_email(appointment, event_type):
     event_type: 'booked', 'updated', 'confirmed', 'cancelled'
     """
     try:
-        # Try to get dynamic settings from database
-        mail_config = MailSetting.objects.first()
-        
-        if mail_config:
-            from_email = mail_config.default_from_email
-            admin_email = mail_config.admin_email
-            # Create dynamic connection
-            connection = get_connection(
-                backend='django.core.mail.backends.smtp.EmailBackend',
-                host=mail_config.email_host,
-                port=mail_config.email_port,
-                username=mail_config.email_host_user,
-                password=mail_config.email_host_password,
-                use_tls=mail_config.email_use_tls,
-                use_ssl=mail_config.email_use_ssl,
-            )
-        else:
-            # Fallback to settings.py
-            from_email = settings.DEFAULT_FROM_EMAIL
-            admin_email = settings.ADMIN_EMAIL
-            connection = None
+        # Always use settings.py for email configuration
+        from_email = settings.DEFAULT_FROM_EMAIL
+        admin_email = settings.ADMIN_EMAIL
+        connection = None
 
         subject_map = {
             'booked': f"New Appointment Request - {appointment.full_name}",
