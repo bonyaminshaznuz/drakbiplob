@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Django
+*.log
+db.sqlite3
+/staticfiles/
+/media/
+
+# Virtualenv
+venv/
+ENV/
+.env
+.env.*
+
+# VSCode
+.vscode/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/build/
+/dist/
+
+# Others
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+
+# Test
+*.pytest_cache/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
