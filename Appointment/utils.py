@@ -1,4 +1,4 @@
-from django.core.mail import send_mail, get_connection
+from mailjet_rest import Client
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
@@ -13,7 +13,7 @@ def send_appointment_email(appointment, event_type):
         # Always use settings.py for email configuration
         from_email = settings.DEFAULT_FROM_EMAIL
         admin_email = settings.ADMIN_EMAIL
-        connection = None
+        mailjet = Client(auth=(settings.MAILJET_API_KEY, settings.MAILJET_API_SECRET), version='v3.1')
 
         subject_map = {
             'booked': f"New Appointment Request - {appointment.full_name}",
@@ -47,21 +47,27 @@ def send_appointment_email(appointment, event_type):
 
         # Send to User
         if recipient_list:
-            send_mail(
-                subject=subject,
-                message=plain_message,
-                from_email=from_email,
-                recipient_list=recipient_list,
-                html_message=html_message,
-                connection=connection,
-                fail_silently=False # Keep it False inside our try-block to see errors in console
-            )
+            data = {
+                'Messages': [
+                    {
+                        "From": {
+                            "Email": from_email.split('<')[-1].replace('>', '').strip() if '<' in from_email else from_email,
+                            "Name": from_email.split('<')[0].strip() if '<' in from_email else from_email
+                        },
+                        "To": [{"Email": email, "Name": appointment.full_name} for email in recipient_list],
+                        "Subject": subject,
+                        "TextPart": plain_message,
+                        "HTMLPart": html_message or plain_message,
+                    }
+                ]
+            }
+            result = mailjet.send.create(data=data)
+            if result.status_code != 200:
+                print(f"Mailjet user email error: {result.status_code} {result.json()}")
 
         # 2. Email to Admin
         if admin_email:
             admin_subject = f"ADMIN ALERT: {subject}"
-            
-            # Try rendering Admin HTML template
             try:
                 admin_html_message = render_to_string('emails/admin_notification.html', context)
                 admin_plain_message = strip_tags(admin_html_message)
@@ -69,16 +75,23 @@ def send_appointment_email(appointment, event_type):
                 print(f"Admin template error: {e}")
                 admin_plain_message = f"Admin Alert: {event_type}\nPatient: {appointment.full_name}\nID: {appointment.formatted_id}"
                 admin_html_message = None
-
-            send_mail(
-                subject=admin_subject,
-                message=admin_plain_message,
-                from_email=from_email,
-                recipient_list=[admin_email],
-                html_message=admin_html_message,
-                connection=connection,
-                fail_silently=False
-            )
+            data = {
+                'Messages': [
+                    {
+                        "From": {
+                            "Email": from_email.split('<')[-1].replace('>', '').strip() if '<' in from_email else from_email,
+                            "Name": from_email.split('<')[0].strip() if '<' in from_email else from_email
+                        },
+                        "To": [{"Email": admin_email, "Name": "Admin"}],
+                        "Subject": admin_subject,
+                        "TextPart": admin_plain_message,
+                        "HTMLPart": admin_html_message or admin_plain_message,
+                    }
+                ]
+            }
+            result = mailjet.send.create(data=data)
+            if result.status_code != 200:
+                print(f"Mailjet admin email error: {result.status_code} {result.json()}")
             
     except Exception as e:
         # LOG THE ERROR BUT DON'T CRASH THE SITE
