@@ -158,7 +158,7 @@ else:
 MAILJET_API_KEY = os.getenv('MAILJET_API_KEY', 'c67608fe80dca2a45dd50feef7cf353d')
 MAILJET_API_SECRET = os.getenv('MAILJET_API_SECRET', '4a8edee35cec2a9885a14b492a645325')
 DEFAULT_FROM_EMAIL = 'Dr Abul Khayer Biplob <appoinment@drakbiplob.com>'
-ADMIN_EMAIL = 'mdshaznuz@gmail.com'
+ADMIN_EMAIL = 'akbiplob36@gmail.com'
 
 LOGGING = {
     'version': 1,
