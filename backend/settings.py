@@ -127,7 +127,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (Uploaded by users)
@@ -145,6 +145,26 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# WhiteNoise configuration for static files
+# Note: WhiteNoise doesn't recommend serving media files (user uploads)
+# For production, consider using cloud storage (AWS S3, Cloudinary, etc.)
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG
+
+# Media files configuration for production
+# In production, ensure API_URL is set correctly for absolute URLs
+# API_URL should be set in environment variables (e.g., https://yourdomain.com)
+# For automatic detection, use request.build_absolute_uri() which is already used in serializers
+
+# Ensure MEDIA_ROOT exists
+if not MEDIA_ROOT.exists():
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+
+# Production media files serving
+# Note: For production, ideally use cloud storage (AWS S3, Cloudinary, etc.)
+# or configure web server (nginx/apache) to serve media files directly
+# This configuration works for platforms like Heroku, Railway, Render
 
 # CORS and CSRF
 

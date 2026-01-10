@@ -15,17 +15,37 @@ def get_image_url(image_field, request=None):
         image_url = image_field.url
         
         if request:
-            # Use request to build absolute URL
-            return request.build_absolute_uri(image_url)
+            # Use request to build absolute URL (works in both dev and production)
+            absolute_url = request.build_absolute_uri(image_url)
+            return absolute_url
         
         # Fallback: construct URL manually using API_URL from settings
+        # This is used when request context is not available
         api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
-        # Ensure URL starts with /
+        
+        # Ensure API_URL doesn't end with /
+        api_url = api_url.rstrip('/')
+        
+        # Ensure image_url starts with / (MEDIA_URL already includes it)
         if not image_url.startswith('/'):
             image_url = f"/{image_url}"
-        return f"{api_url.rstrip('/')}{image_url}"
+        elif image_url.startswith('//'):
+            # Handle cases where URL might have double slashes
+            image_url = image_url[1:]
+        
+        # Construct full URL
+        full_url = f"{api_url}{image_url}"
+        return full_url
+        
+    except AttributeError as e:
+        # If image_field doesn't have a url attribute
+        print(f"ImageField missing url attribute: {e}")
+        return None
     except Exception as e:
-        print(f"Error building image URL: {e}")
+        # Log error for debugging but don't crash
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error building image URL: {e}", exc_info=True)
         return None
 
 

@@ -33,10 +33,24 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 else:
     # In production, serve media files manually
-    urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-        re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
-    ]
+    # Note: For better performance, use a web server (nginx/apache) or cloud storage (S3, Cloudinary)
+    # This is a fallback for platforms that don't support direct file serving
+    if settings.MEDIA_ROOT and settings.MEDIA_ROOT.exists():
+        urlpatterns += [
+            re_path(r'^media/(?P<path>.*)$', serve, {
+                'document_root': str(settings.MEDIA_ROOT),
+                'show_indexes': False,
+            }),
+        ]
+    # Static files should be served by WhiteNoise in production
+    # But keeping this as fallback
+    if settings.STATIC_ROOT and settings.STATIC_ROOT.exists():
+        urlpatterns += [
+            re_path(r'^static/(?P<path>.*)$', serve, {
+                'document_root': str(settings.STATIC_ROOT),
+                'show_indexes': False,
+            }),
+        ]
 
 # Custom error handlers
 handler404 = 'Appointment.views.custom_404_view'
