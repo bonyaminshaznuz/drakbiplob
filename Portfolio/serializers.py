@@ -1,8 +1,11 @@
 from rest_framework import serializers
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings
+from django.conf import settings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings, SiteSettings
 
 
 class HeroSectionSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = HeroSection
         fields = [
@@ -10,6 +13,16 @@ class HeroSectionSerializer(serializers.ModelSerializer):
             'image', 'image_alt', 'video_url', 'years_experience',
             'patients_count', 'emergency_availability', 'rating'
         ]
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            # Fallback: construct URL manually
+            api_url = getattr(settings, 'API_URL', 'http://localhost:8000')
+            return f"{api_url.rstrip('/')}{settings.MEDIA_URL}{obj.image.url.lstrip('/')}"
+        return None
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -19,6 +32,8 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class AboutSectionSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = AboutSection
         fields = [
@@ -27,17 +42,53 @@ class AboutSectionSerializer(serializers.ModelSerializer):
             'years_experience_detail', 'years_experience_description'
         ]
 
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            # Fallback: construct URL manually
+            api_url = getattr(settings, 'API_URL', 'http://localhost:8000')
+            return f"{api_url.rstrip('/')}{settings.MEDIA_URL}{obj.image.url.lstrip('/')}"
+        return None
+
 
 class VideoSerializer(serializers.ModelSerializer):
+    thumbnail_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Video
         fields = ['id', 'title', 'description', 'thumbnail_url', 'video_url', 'duration', 'order']
 
+    def get_thumbnail_url(self, obj):
+        # Return uploaded thumbnail image URL
+        if obj.thumbnail:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.thumbnail.url)
+            # Fallback: construct URL manually
+            api_url = getattr(settings, 'API_URL', 'http://localhost:8000')
+            return f"{api_url.rstrip('/')}{settings.MEDIA_URL}{obj.thumbnail.url.lstrip('/')}"
+        return None
+
 
 class TestimonialSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Testimonial
         fields = ['id', 'name', 'role', 'content', 'rating', 'image_url', 'order']
+
+    def get_image_url(self, obj):
+        # Return uploaded image URL
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            # Fallback: construct URL manually
+            api_url = getattr(settings, 'API_URL', 'http://localhost:8000')
+            return f"{api_url.rstrip('/')}{settings.MEDIA_URL}{obj.image.url.lstrip('/')}"
+        return None
 
 
 class ResearchSerializer(serializers.ModelSerializer):
@@ -47,12 +98,25 @@ class ResearchSerializer(serializers.ModelSerializer):
 
 
 class ContactSectionSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = ContactSection
         fields = [
             'badge_text', 'title', 'description', 'image_url', 'image_alt',
             'show_virtual_consultations', 'show_in_person_visits'
         ]
+
+    def get_image_url(self, obj):
+        # Return uploaded image URL
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            # Fallback: construct URL manually
+            api_url = getattr(settings, 'API_URL', 'http://localhost:8000')
+            return f"{api_url.rstrip('/')}{settings.MEDIA_URL}{obj.image.url.lstrip('/')}"
+        return None
 
 
 class NavbarSettingsSerializer(serializers.ModelSerializer):
@@ -77,6 +141,25 @@ class FooterSettingsSerializer(serializers.ModelSerializer):
             'social_media_title', 'facebook_url', 'twitter_url', 'linkedin_url', 'instagram_url', 'youtube_url',
             'copyright_text', 'footer_links'
         ]
+
+
+class SiteSettingsSerializer(serializers.ModelSerializer):
+    favicon_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SiteSettings
+        fields = ['site_title', 'favicon_url', 'site_description']
+
+    def get_favicon_url(self, obj):
+        # Return uploaded favicon URL
+        if obj.favicon:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.favicon.url)
+            # Fallback: construct URL manually
+            api_url = getattr(settings, 'API_URL', 'http://localhost:8000')
+            return f"{api_url.rstrip('/')}{settings.MEDIA_URL}{obj.favicon.url.lstrip('/')}"
+        return None
 
 
 class PortfolioDataSerializer(serializers.Serializer):

@@ -76,7 +76,7 @@ class AboutSection(models.Model):
 class Video(models.Model):
     title = models.CharField(max_length=300)
     description = models.TextField()
-    thumbnail_url = models.URLField(blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='portfolio/videos/', blank=True, null=True, help_text="Upload thumbnail image")
     video_url = models.URLField(blank=True, null=True)
     duration = models.CharField(max_length=20, default="05 MINS")
     order = models.IntegerField(default=0, help_text="Display order")
@@ -96,7 +96,7 @@ class Testimonial(models.Model):
     role = models.CharField(max_length=200, help_text="e.g., Surgical Patient, ICU Patient")
     content = models.TextField()
     rating = models.IntegerField(default=5, choices=[(i, i) for i in range(1, 6)])
-    image_url = models.URLField(blank=True, null=True)
+    image = models.ImageField(upload_to='portfolio/testimonials/', blank=True, null=True, help_text="Upload profile image")
     order = models.IntegerField(default=0, help_text="Display order")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -129,7 +129,7 @@ class ContactSection(models.Model):
     badge_text = models.CharField(max_length=100, default="Book Now")
     title = models.CharField(max_length=300, default="Schedule a Virtual or In-Personal Appointment Today")
     description = models.TextField()
-    image_url = models.URLField(blank=True, null=True)
+    image = models.ImageField(upload_to='portfolio/contact/', blank=True, null=True, help_text="Upload image")
     image_alt = models.CharField(max_length=200, default="Doctor consultation")
     show_virtual_consultations = models.BooleanField(default=True)
     show_in_person_visits = models.BooleanField(default=True)
@@ -231,5 +231,29 @@ class FooterSettings(models.Model):
     def save(self, *args, **kwargs):
         # Ensure only one instance exists
         if not self.pk and FooterSettings.objects.exists():
+            return
+        super().save(*args, **kwargs)
+
+
+class SiteSettings(models.Model):
+    """Site-wide settings including favicon"""
+    site_title = models.CharField(max_length=200, default="Dr. Abul Khayer (Biplob)")
+    favicon = models.ImageField(upload_to='site/favicon/', blank=True, null=True, help_text="Upload favicon (recommended: 32x32 or 16x16 PNG/ICO)")
+    site_description = models.TextField(blank=True, null=True)
+    
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Site Settings"
+        verbose_name_plural = "Site Settings"
+
+    def __str__(self):
+        return "Site Settings"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists
+        if not self.pk and SiteSettings.objects.exists():
             return
         super().save(*args, **kwargs)

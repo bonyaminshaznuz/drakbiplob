@@ -1,64 +1,283 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="mb-6">
-        <a href="{% url 'admin-service-list' %}" class="text-green-600 hover:text-green-800 font-semibold mb-4 inline-block">
+<div class="w-full max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-6 overflow-x-hidden">
+    <div class="mb-4 sm:mb-6">
+        <a href="{% url 'admin-service-list' %}" class="text-green-600 hover:text-green-800 font-semibold mb-4 inline-block text-sm sm:text-base">
             <i class="fas fa-arrow-left mr-2"></i>Back to List
         </a>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ action }} Service</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{{ action }} Service</h1>
     </div>
 
-    <form method="post" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-6">
+    <form method="post" class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 w-full overflow-x-hidden">
         {% csrf_token %}
         
         <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Icon Class (Font Awesome)</label>
-            <input type="text" name="icon" value="{{ service.icon|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="fas fa-syringe" required>
-            <p class="mt-2 text-xs text-gray-500">Example: fas fa-syringe, fas fa-heartbeat, fas fa-hand-holding-medical</p>
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                <input type="text" id="icon-input" name="icon" value="{{ service.icon|default:'' }}" class="flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base" placeholder="fas fa-syringe" required>
+                <button type="button" onclick="openIconPicker('icon-input')" class="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-lg transition-colors whitespace-nowrap">
+                    <i class="fas fa-icons mr-1 sm:mr-2"></i><span class="hidden sm:inline">Pick Icon</span><span class="sm:hidden">Pick</span>
+                </button>
+            </div>
+            <div id="icon-preview" class="mt-3 flex flex-wrap items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg sm:rounded-xl">
+                <span class="text-gray-500 text-xs sm:text-sm">Preview:</span>
+                <i id="preview-icon" class="text-xl sm:text-2xl text-gray-400"></i>
+                <span id="preview-text" class="text-xs sm:text-sm text-gray-500 break-all"></span>
+            </div>
         </div>
 
         <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Title</label>
-            <input type="text" name="title" value="{{ service.title|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Service Name" required>
+            <input type="text" name="title" value="{{ service.title|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base" placeholder="Service Name" required>
         </div>
 
         <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
-            <textarea name="description" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Service description..." required>{{ service.description|default:'' }}</textarea>
+            <textarea name="description" rows="4" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base resize-y" placeholder="Service description..." required>{{ service.description|default:'' }}</textarea>
         </div>
 
         <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Link URL (Optional)</label>
-            <input type="url" name="link" value="{{ service.link|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="https://...">
+            <input type="url" name="link" value="{{ service.link|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base" placeholder="https://...">
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-2">Display Order</label>
-                <input type="number" name="order" value="{{ service.order|default:0 }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" min="0">
+                <input type="number" name="order" value="{{ service.order|default:0 }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base" min="0">
             </div>
         </div>
 
-        <div class="space-y-3">
+        <div class="space-y-2 sm:space-y-3">
             <div class="flex items-center">
-                <input type="checkbox" name="is_featured" {% if service.is_featured %}checked{% endif %} class="h-5 w-5 text-green-600 rounded border-gray-300 focus:ring-green-500">
-                <label class="ml-3 text-sm font-semibold text-gray-700">Featured (Show in hero section)</label>
+                <input type="checkbox" name="is_featured" {% if service.is_featured %}checked{% endif %} class="h-4 w-4 sm:h-5 sm:w-5 text-green-600 rounded border-gray-300 focus:ring-green-500 flex-shrink-0">
+                <label class="ml-2 sm:ml-3 text-xs sm:text-sm font-semibold text-gray-700">Featured (Show in hero section)</label>
             </div>
             <div class="flex items-center">
-                <input type="checkbox" name="is_active" {% if service.is_active or not service %}checked{% endif %} class="h-5 w-5 text-green-600 rounded border-gray-300 focus:ring-green-500">
-                <label class="ml-3 text-sm font-semibold text-gray-700">Active (Display on website)</label>
+                <input type="checkbox" name="is_active" {% if service.is_active or not service %}checked{% endif %} class="h-4 w-4 sm:h-5 sm:w-5 text-green-600 rounded border-gray-300 focus:ring-green-500 flex-shrink-0">
+                <label class="ml-2 sm:ml-3 text-xs sm:text-sm font-semibold text-gray-700">Active (Display on website)</label>
             </div>
         </div>
 
-        <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-colors">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+            <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-lg transition-colors">
                 <i class="fas fa-save mr-2"></i>Save
             </button>
-            <a href="{% url 'admin-service-list' %}" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+            <a href="{% url 'admin-service-list' %}" class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm sm:text-base hover:bg-gray-50 transition-colors text-center">
                 Cancel
             </a>
         </div>
     </form>
 </div>
+
+<!-- Icon Picker Modal -->
+<div id="icon-picker-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col m-2 sm:m-4 overflow-hidden">
+        <div class="p-4 sm:p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-3 sm:mb-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Select Font Awesome Icon</h2>
+                <button onclick="closeIconPicker()" class="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl leading-none">&times;</button>
+            </div>
+            <div class="mt-3 sm:mt-4">
+                <input type="text" id="icon-search" placeholder="Search icons (e.g., heart, syringe)" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+            </div>
+        </div>
+        <div id="icon-grid" class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 sm:gap-3">
+            <!-- Icons will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome 6.5.1 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script>
+// Font Awesome 6.5.1 Icon List (Popular Icons)
+const fontAwesomeIcons = [
+    // Medical & Health
+    'fas fa-heartbeat', 'fas fa-heart', 'fas fa-stethoscope', 'fas fa-user-md', 'fas fa-hospital',
+    'fas fa-ambulance', 'fas fa-pills', 'fas fa-syringe', 'fas fa-x-ray', 'fas fa-band-aid',
+    'fas fa-lungs', 'fas fa-brain', 'fas fa-tooth', 'fas fa-eye', 'fas fa-ear',
+    'fas fa-hand-holding-medical', 'fas fa-procedures', 'fas fa-notes-medical', 'fas fa-file-medical',
+    'fas fa-prescription-bottle', 'fas fa-capsules', 'fas fa-thermometer-half', 'fas fa-microscope',
+    
+    // General Icons
+    'fas fa-home', 'fas fa-user', 'fas fa-users', 'fas fa-envelope', 'fas fa-phone',
+    'fas fa-calendar', 'fas fa-clock', 'fas fa-map-marker-alt', 'fas fa-globe', 'fas fa-link',
+    'fas fa-image', 'fas fa-video', 'fas fa-music', 'fas fa-file', 'fas fa-folder',
+    'fas fa-search', 'fas fa-bell', 'fas fa-star', 'fas fa-heart', 'fas fa-thumbs-up',
+    'fas fa-share', 'fas fa-download', 'fas fa-upload', 'fas fa-print', 'fas fa-edit',
+    'fas fa-trash', 'fas fa-save', 'fas fa-check', 'fas fa-times', 'fas fa-plus',
+    'fas fa-minus', 'fas fa-arrow-right', 'fas fa-arrow-left', 'fas fa-arrow-up', 'fas fa-arrow-down',
+    'fas fa-chevron-right', 'fas fa-chevron-left', 'fas fa-chevron-up', 'fas fa-chevron-down',
+    'fas fa-bars', 'fas fa-ellipsis-v', 'fas fa-ellipsis-h', 'fas fa-cog', 'fas fa-wrench',
+    'fas fa-tools', 'fas fa-lock', 'fas fa-unlock', 'fas fa-key', 'fas fa-shield-alt',
+    'fas fa-info-circle', 'fas fa-question-circle', 'fas fa-exclamation-circle', 'fas fa-exclamation-triangle',
+    'fas fa-check-circle', 'fas fa-times-circle', 'fas fa-ban', 'fas fa-filter', 'fas fa-sort',
+    
+    // Business & Services
+    'fas fa-briefcase', 'fas fa-building', 'fas fa-store', 'fas fa-shopping-cart', 'fas fa-credit-card',
+    'fas fa-money-bill', 'fas fa-chart-line', 'fas fa-chart-bar', 'fas fa-chart-pie', 'fas fa-calculator',
+    'fas fa-handshake', 'fas fa-award', 'fas fa-trophy', 'fas fa-medal', 'fas fa-certificate',
+    'fas fa-graduation-cap', 'fas fa-book', 'fas fa-book-open', 'fas fa-newspaper', 'fas fa-blog',
+    
+    // Technology
+    'fas fa-laptop', 'fas fa-desktop', 'fas fa-mobile-alt', 'fas fa-tablet-alt', 'fas fa-server',
+    'fas fa-database', 'fas fa-cloud', 'fas fa-wifi', 'fas fa-bluetooth', 'fas fa-usb',
+    'fas fa-code', 'fas fa-terminal', 'fas fa-bug', 'fas fa-network-wired', 'fas fa-ethernet',
+    
+    // Communication
+    'fas fa-comments', 'fas fa-comment', 'fas fa-comment-dots', 'fas fa-comment-alt', 'fas fa-reply',
+    'fas fa-share-alt', 'fas fa-paper-plane', 'fas fa-inbox', 'fas fa-envelope-open', 'fas fa-at',
+    
+    // Social Media
+    'fab fa-facebook', 'fab fa-twitter', 'fab fa-instagram', 'fab fa-linkedin', 'fab fa-youtube',
+    'fab fa-github', 'fab fa-google', 'fab fa-whatsapp', 'fab fa-telegram', 'fab fa-discord',
+    
+    // Transportation
+    'fas fa-car', 'fas fa-bus', 'fas fa-train', 'fas fa-plane', 'fas fa-ship', 'fas fa-bicycle',
+    'fas fa-walking', 'fas fa-running',
+    
+    // Food & Drink
+    'fas fa-utensils', 'fas fa-coffee', 'fas fa-wine-glass', 'fas fa-birthday-cake', 'fas fa-cookie',
+    
+    // Weather & Nature
+    'fas fa-sun', 'fas fa-moon', 'fas fa-cloud', 'fas fa-cloud-rain', 'fas fa-snowflake',
+    'fas fa-tree', 'fas fa-leaf', 'fas fa-seedling', 'fas fa-mountain',
+    
+    // Sports & Activities
+    'fas fa-football-ball', 'fas fa-basketball-ball', 'fas fa-baseball-ball', 'fas fa-volleyball-ball',
+    'fas fa-swimming-pool', 'fas fa-dumbbell', 'fas fa-running',
+    
+    // Education
+    'fas fa-graduation-cap', 'fas fa-chalkboard-teacher', 'fas fa-book-reader', 'fas fa-pencil-alt',
+    'fas fa-highlighter', 'fas fa-marker', 'fas fa-ruler', 'fas fa-calculator',
+    
+    // More Medical
+    'fas fa-wheelchair', 'fas fa-blind', 'fas fa-deaf', 'fas fa-sign-language', 'fas fa-accessible-icon',
+    'fas fa-first-aid', 'fas fa-hospital-alt', 'fas fa-clinic-medical', 'fas fa-vial', 'fas fa-flask',
+    
+    // Additional Common Icons
+    'fas fa-fire', 'fas fa-water', 'fas fa-lightbulb', 'fas fa-battery-full', 'fas fa-plug',
+    'fas fa-power-off', 'fas fa-play', 'fas fa-pause', 'fas fa-stop', 'fas fa-forward',
+    'fas fa-backward', 'fas fa-redo', 'fas fa-undo', 'fas fa-history', 'fas fa-refresh',
+    'fas fa-sync', 'fas fa-spinner', 'fas fa-circle-notch', 'fas fa-dot-circle', 'fas fa-circle',
+    'fas fa-square', 'fas fa-square-full', 'fas fa-th', 'fas fa-th-large', 'fas fa-th-list',
+    'fas fa-list', 'fas fa-list-ul', 'fas fa-list-ol', 'fas fa-align-left', 'fas fa-align-center',
+    'fas fa-align-right', 'fas fa-align-justify', 'fas fa-bold', 'fas fa-italic', 'fas fa-underline',
+    'fas fa-strikethrough', 'fas fa-heading', 'fas fa-paragraph', 'fas fa-quote-left', 'fas fa-quote-right',
+    'fas fa-link', 'fas fa-unlink', 'fas fa-image', 'fas fa-images', 'fas fa-photo-video',
+    'fas fa-film', 'fas fa-camera', 'fas fa-camera-retro', 'fas fa-video', 'fas fa-video-slash',
+    'fas fa-microphone', 'fas fa-microphone-slash', 'fas fa-volume-up', 'fas fa-volume-down',
+    'fas fa-volume-mute', 'fas fa-volume-off', 'fas fa-headphones', 'fas fa-headphones-alt',
+    'fas fa-radio', 'fas fa-tv', 'fas fa-desktop', 'fas fa-laptop-code', 'fas fa-tablet-alt',
+    'fas fa-mobile-alt', 'fas fa-phone', 'fas fa-phone-alt', 'fas fa-phone-slash', 'fas fa-fax',
+    'fas fa-address-book', 'fas fa-address-card', 'fas fa-id-card', 'fas fa-id-badge', 'fas fa-user-tag',
+    'fas fa-user-tie', 'fas fa-user-graduate', 'fas fa-user-nurse', 'fas fa-user-md', 'fas fa-user-injured',
+    'fas fa-user-friends', 'fas fa-user-plus', 'fas fa-user-minus', 'fas fa-user-times', 'fas fa-user-check',
+    'fas fa-user-cog', 'fas fa-user-shield', 'fas fa-user-lock', 'fas fa-user-unlock', 'fas fa-user-edit',
+    'fas fa-user-slash', 'fas fa-users-cog', 'fas fa-users-slash', 'fas fa-user-secret', 'fas fa-user-astronaut',
+    'fas fa-user-astronaut', 'fas fa-user-clock', 'fas fa-user-edit', 'fas fa-user-friends', 'fas fa-user-graduate',
+    'fas fa-user-injured', 'fas fa-user-lock', 'fas fa-user-md', 'fas fa-user-minus', 'fas fa-user-ninja',
+    'fas fa-user-nurse', 'fas fa-user-plus', 'fas fa-user-secret', 'fas fa-user-shield', 'fas fa-user-slash',
+    'fas fa-user-tag', 'fas fa-user-tie', 'fas fa-user-times', 'fas fa-user-unlock', 'fas fa-users',
+    'fas fa-users-cog', 'fas fa-users-slash', 'fas fa-vial', 'fas fa-vials', 'fas fa-video',
+    'fas fa-video-slash', 'fas fa-vihara', 'fas fa-voicemail', 'fas fa-volleyball-ball', 'fas fa-volume-down',
+    'fas fa-volume-mute', 'fas fa-volume-off', 'fas fa-volume-up', 'fas fa-vote-yea', 'fas fa-vr-cardboard',
+    'fas fa-walking', 'fas fa-wallet', 'fas fa-warehouse', 'fas fa-water', 'fas fa-wave-square',
+    'fas fa-weight', 'fas fa-weight-hanging', 'fas fa-wheelchair', 'fas fa-wifi', 'fas fa-wind',
+    'fas fa-window-close', 'fas fa-window-maximize', 'fas fa-window-minimize', 'fas fa-window-restore',
+    'fas fa-wine-bottle', 'fas fa-wine-glass', 'fas fa-wine-glass-alt', 'fas fa-won-sign', 'fas fa-wrench',
+    'fas fa-x-ray', 'fas fa-yen-sign', 'fas fa-yin-yang'
+];
+
+let currentIconInput = null;
+
+function openIconPicker(inputId) {
+    currentIconInput = document.getElementById(inputId);
+    document.getElementById('icon-picker-modal').classList.remove('hidden');
+    loadIcons();
+    updatePreview();
+}
+
+function closeIconPicker() {
+    document.getElementById('icon-picker-modal').classList.add('hidden');
+    document.getElementById('icon-search').value = '';
+    currentIconInput = null;
+}
+
+function loadIcons(searchTerm = '') {
+    const grid = document.getElementById('icon-grid');
+    grid.innerHTML = '';
+    
+    const filteredIcons = fontAwesomeIcons.filter(icon => {
+        const iconName = icon.replace('fas fa-', '').replace('fab fa-', '');
+        return iconName.includes(searchTerm.toLowerCase());
+    });
+    
+    filteredIcons.forEach(icon => {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all min-h-[80px] sm:min-h-[100px]';
+        iconDiv.onclick = () => selectIcon(icon);
+        
+        const iconElement = document.createElement('i');
+        iconElement.className = icon + ' text-xl sm:text-2xl text-gray-700 mb-1 sm:mb-2';
+        iconDiv.appendChild(iconElement);
+        
+        const iconText = document.createElement('span');
+        iconText.className = 'text-[10px] sm:text-xs text-gray-600 text-center break-all px-1';
+        iconText.textContent = icon;
+        iconDiv.appendChild(iconText);
+        
+        grid.appendChild(iconDiv);
+    });
+    
+    if (filteredIcons.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No icons found</div>';
+    }
+}
+
+function selectIcon(icon) {
+    if (currentIconInput) {
+        currentIconInput.value = icon;
+        updatePreview();
+        closeIconPicker();
+    }
+}
+
+function updatePreview() {
+    const iconInput = document.getElementById('icon-input');
+    if (iconInput && iconInput.value) {
+        document.getElementById('preview-icon').className = iconInput.value + ' text-2xl text-blue-600';
+        document.getElementById('preview-text').textContent = iconInput.value;
+        document.getElementById('icon-preview').classList.remove('hidden');
+    } else {
+        document.getElementById('icon-preview').classList.add('hidden');
+    }
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('icon-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            loadIcons(e.target.value);
+        });
+    }
+    
+    const iconInput = document.getElementById('icon-input');
+    if (iconInput) {
+        iconInput.addEventListener('input', updatePreview);
+        updatePreview();
+    }
+    
+    // Close modal on outside click
+    document.getElementById('icon-picker-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeIconPicker();
+        }
+    });
+});
+</script>
 {% endblock %}

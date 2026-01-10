@@ -55,7 +55,7 @@
                 <span>Mail Settings</span>
             </a>
             <a href="{% url 'admin-portfolio-dashboard' %}"
-                class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 {% if 'portfolio' in request.resolver_match.url_name %}active{% endif %}">
+                class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 {% if 'portfolio' in request.resolver_match.url_name and request.resolver_match.url_name != 'admin-navbar-edit' and request.resolver_match.url_name != 'admin-footer-edit' and request.resolver_match.url_name != 'admin-site-settings-edit' %}active{% endif %}">
                 <i class="fas fa-briefcase w-5"></i>
                 <span>Portfolio</span>
             </a>
@@ -68,6 +68,11 @@
                 class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 {% if request.resolver_match.url_name == 'admin-footer-edit' %}active{% endif %}">
                 <i class="fas fa-window-minimize w-5"></i>
                 <span>Footer</span>
+            </a>
+            <a href="{% url 'admin-site-settings-edit' %}"
+                class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 {% if request.resolver_match.url_name == 'admin-site-settings-edit' %}active{% endif %}">
+                <i class="fas fa-star w-5"></i>
+                <span>Site Settings</span>
             </a>
         </nav>
 
@@ -134,7 +139,7 @@
                     <span>Mail Settings</span>
                 </a>
                 <a href="{% url 'admin-portfolio-dashboard' %}"
-                    class="flex items-center gap-4 p-4 rounded-2xl {% if 'portfolio' in request.resolver_match.url_name and request.resolver_match.url_name != 'admin-navbar-edit' and request.resolver_match.url_name != 'admin-footer-edit' %}bg-blue-50 text-blue-600 font-bold{% else %}text-gray-600 font-semibold hover:bg-gray-50{% endif %} transition-all">
+                    class="flex items-center gap-4 p-4 rounded-2xl {% if 'portfolio' in request.resolver_match.url_name and request.resolver_match.url_name != 'admin-navbar-edit' and request.resolver_match.url_name != 'admin-footer-edit' and request.resolver_match.url_name != 'admin-site-settings-edit' %}bg-blue-50 text-blue-600 font-bold{% else %}text-gray-600 font-semibold hover:bg-gray-50{% endif %} transition-all">
                     <i class="fas fa-briefcase"></i>
                     <span>Portfolio</span>
                 </a>
@@ -147,6 +152,11 @@
                     class="flex items-center gap-4 p-4 rounded-2xl {% if request.resolver_match.url_name == 'admin-footer-edit' %}bg-blue-50 text-blue-600 font-bold{% else %}text-gray-600 font-semibold hover:bg-gray-50{% endif %} transition-all">
                     <i class="fas fa-window-minimize"></i>
                     <span>Footer</span>
+                </a>
+                <a href="{% url 'admin-site-settings-edit' %}"
+                    class="flex items-center gap-4 p-4 rounded-2xl {% if request.resolver_match.url_name == 'admin-site-settings-edit' %}bg-blue-50 text-blue-600 font-bold{% else %}text-gray-600 font-semibold hover:bg-gray-50{% endif %} transition-all">
+                    <i class="fas fa-star"></i>
+                    <span>Site Settings</span>
                 </a>
             </div>
 
@@ -165,8 +175,8 @@
     </div>
 
     <!-- Main Content Area -->
-    <main class="lg:ml-64 min-h-screen transition-all duration-300">
-        <div class="pt-20 lg:pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+    <main class="lg:ml-64 min-h-screen transition-all duration-300 overflow-x-hidden">
+        <div class="pt-20 lg:pt-8 pb-12 px-3 sm:px-4 lg:px-6 xl:px-8 max-w-6xl mx-auto w-full overflow-x-hidden">
             {% if messages %}
             <div class="mb-6 space-y-2">
                 {% for message in messages %}

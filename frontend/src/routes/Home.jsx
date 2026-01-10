@@ -137,6 +137,9 @@ const Home = () => {
                                             src={hero.image || "/images/pp.jpg"}
                                             alt={hero.image_alt || "Dr. Abul Khayer"}
                                             className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-700"
+                                            onError={(e) => {
+                                                e.target.src = "/images/pp.jpg";
+                                            }}
                                         />
 
                                         {/* Overlay Gradient at bottom */}
@@ -236,7 +239,14 @@ const Home = () => {
                             <div className="relative group mb-8 lg:mb-0">
                                 <div className="hidden sm:block absolute -left-3 sm:-left-6 top-6 bottom-6 w-2 sm:w-3 bg-gradient-to-b from-secondary to-accent rounded-full"></div>
                                 <div className="absolute -inset-2 sm:-inset-4 bg-primary rounded-2xl sm:rounded-3xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                                <img src={about.image || "/images/cover.jpg"} alt={about.image_alt || "Doctor with patient"} className="relative rounded-2xl sm:rounded-3xl shadow-2xl w-full h-auto object-cover border-2 sm:border-4 border-white" />
+                                <img 
+                                    src={about.image || "/images/cover.jpg"} 
+                                    alt={about.image_alt || "Doctor with patient"} 
+                                    className="relative rounded-2xl sm:rounded-3xl shadow-2xl w-full h-auto object-cover border-2 sm:border-4 border-white"
+                                    onError={(e) => {
+                                        e.target.src = "/images/cover.jpg";
+                                    }}
+                                />
                                 {/* Floating Element */}
                                 <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-white rounded-xl sm:rounded-2xl shadow-2xl p-3 sm:p-4 md:p-6">
                                     <div className="flex items-center gap-2 sm:gap-3">
@@ -434,9 +444,14 @@ const Home = () => {
                                 videos.slice(0, 3).map((video) => (
                                     <div key={video.id} className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group">
                                         <div className="relative overflow-hidden">
-                                            <img src={video.thumbnail_url || "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=250&fit=crop"}
+                                            <img 
+                                                src={video.thumbnail_url || "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=250&fit=crop"}
                                                 alt={video.title || "Video thumbnail"}
-                                                className="w-full h-44 sm:h-48 md:h-56 object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                className="w-full h-44 sm:h-48 md:h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                                                onError={(e) => {
+                                                    e.target.src = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=250&fit=crop";
+                                                }}
+                                            />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
                                             </div>
                                             <div className="absolute inset-0 flex items-center justify-center">
@@ -669,9 +684,14 @@ const Home = () => {
                                 <div
                                     className="absolute -inset-4 bg-white/10 backdrop-blur-sm rounded-3xl blur-xl group-hover:bg-white/20 transition-colors">
                                 </div>
-                                <img src={contact.image_url || "https://images.unsplash.com/photo-1551836022-4c4c79ecde51?w=600&h=400&fit=crop"}
+                                <img 
+                                    src={contact.image_url || "https://images.unsplash.com/photo-1551836022-4c4c79ecde51?w=600&h=400&fit=crop"}
                                     alt={contact.image_alt || "Doctor consultation"}
-                                    className="relative rounded-3xl shadow-large w-full h-auto object-cover border-4 border-white/20" />
+                                    className="relative rounded-3xl shadow-large w-full h-auto object-cover border-4 border-white/20"
+                                    onError={(e) => {
+                                        e.target.src = "https://images.unsplash.com/photo-1551836022-4c4c79ecde51?w=600&h=400&fit=crop";
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
@@ -770,8 +790,14 @@ const Home = () => {
                                             {testimonial.content}
                                         </p>
                                         <div className="flex items-center gap-4 pt-6 border-t border-gray-200">
-                                            <img src={testimonial.image_url || `https://i.pravatar.cc/50?img=${testimonial.id || 1}`} alt={testimonial.name}
-                                                className="w-14 h-14 rounded-full border-3 border-primary/20" />
+                                            <img 
+                                                src={testimonial.image_url || `https://i.pravatar.cc/50?img=${testimonial.id || 1}`} 
+                                                alt={testimonial.name}
+                                                className="w-14 h-14 rounded-full border-3 border-primary/20"
+                                                onError={(e) => {
+                                                    e.target.src = `https://i.pravatar.cc/50?img=${testimonial.id || 1}`;
+                                                }}
+                                            />
                                             <div className="text-left">
                                                 <p className="font-bold text-[15px] text-primary">{testimonial.name}</p>
                                                 <p className="text-xs text-gray-500">{testimonial.role}</p>

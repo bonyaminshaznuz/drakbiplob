@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/portfolio/contact/', views.ContactSectionView.as_view(), name='portfolio-contact'),
     path('api/portfolio/navbar/', views.NavbarSettingsView.as_view(), name='portfolio-navbar'),
     path('api/portfolio/footer/', views.FooterSettingsView.as_view(), name='portfolio-footer'),
+    path('api/portfolio/site-settings/', views.SiteSettingsView.as_view(), name='portfolio-site-settings'),
     
     # Admin template views (CRUD)
     path('admin-panel/portfolio/', views.admin_portfolio_dashboard, name='admin-portfolio-dashboard'),
@@ -63,4 +64,7 @@ urlpatterns = [
     # Navbar & Footer Settings
     path('admin-panel/portfolio/navbar/', views.admin_navbar_edit, name='admin-navbar-edit'),
     path('admin-panel/portfolio/footer/', views.admin_footer_edit, name='admin-footer-edit'),
+    
+    # Site Settings
+    path('admin-panel/portfolio/site-settings/', views.admin_site_settings_edit, name='admin-site-settings-edit'),
 ]

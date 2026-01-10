@@ -4,11 +4,11 @@ from rest_framework.views import APIView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings, SiteSettings
 from .serializers import (
     HeroSectionSerializer, ServiceSerializer, AboutSectionSerializer,
     VideoSerializer, TestimonialSerializer, ResearchSerializer,
-    ContactSectionSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer
+    ContactSectionSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer, SiteSettingsSerializer
 )
 
 
@@ -23,7 +23,7 @@ class HeroSectionView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         instance = self.get_queryset()
         if instance:
-            serializer = self.get_serializer(instance)
+            serializer = self.get_serializer(instance, context={'request': request})
             return Response(serializer.data)
         return Response({}, status=status.HTTP_404_NOT_FOUND)
 
@@ -33,6 +33,9 @@ class ServiceListView(generics.ListAPIView):
     serializer_class = ServiceSerializer
     queryset = Service.objects.filter(is_active=True)
 
+    def get_serializer_context(self):
+        return {'request': self.request}
+
 
 class FeaturedServiceListView(generics.ListAPIView):
     """Get featured services (for hero section)"""
@@ -40,6 +43,9 @@ class FeaturedServiceListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Service.objects.filter(is_active=True, is_featured=True).order_by('order')[:3]
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class AboutSectionView(generics.ListAPIView):
@@ -52,7 +58,7 @@ class AboutSectionView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         instance = self.get_queryset()
         if instance:
-            serializer = self.get_serializer(instance)
+            serializer = self.get_serializer(instance, context={'request': request})
             return Response(serializer.data)
         return Response({}, status=status.HTTP_404_NOT_FOUND)
 
@@ -62,11 +68,17 @@ class VideoListView(generics.ListAPIView):
     serializer_class = VideoSerializer
     queryset = Video.objects.filter(is_active=True).order_by('order')
 
+    def get_serializer_context(self):
+        return {'request': self.request}
+
 
 class TestimonialListView(generics.ListAPIView):
     """Get all active testimonials"""
     serializer_class = TestimonialSerializer
     queryset = Testimonial.objects.filter(is_active=True).order_by('order')
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class ResearchListView(generics.ListAPIView):
@@ -85,7 +97,7 @@ class ContactSectionView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         instance = self.get_queryset()
         if instance:
-            serializer = self.get_serializer(instance)
+            serializer = self.get_serializer(instance, context={'request': request})
             return Response(serializer.data)
         return Response({}, status=status.HTTP_404_NOT_FOUND)
 
@@ -103,20 +115,24 @@ class PortfolioDataView(APIView):
         contact = ContactSection.objects.filter(is_active=True).first()
         navbar = NavbarSettings.objects.filter(is_active=True).first()
         footer = FooterSettings.objects.filter(is_active=True).first()
+        site_settings = SiteSettings.objects.filter(is_active=True).first()
 
+        context = {'request': request}
+        
         data = {
-            'hero': HeroSectionSerializer(hero).data if hero else {},
-            'services': ServiceSerializer(services, many=True).data,
+            'hero': HeroSectionSerializer(hero, context=context).data if hero else {},
+            'services': ServiceSerializer(services, many=True, context=context).data,
             'featured_services': ServiceSerializer(
-                services.filter(is_featured=True)[:3], many=True
+                services.filter(is_featured=True)[:3], many=True, context=context
             ).data,
-            'about': AboutSectionSerializer(about).data if about else {},
-            'videos': VideoSerializer(videos, many=True).data,
-            'testimonials': TestimonialSerializer(testimonials, many=True).data,
+            'about': AboutSectionSerializer(about, context=context).data if about else {},
+            'videos': VideoSerializer(videos, many=True, context=context).data,
+            'testimonials': TestimonialSerializer(testimonials, many=True, context=context).data,
             'research': ResearchSerializer(research, many=True).data,
-            'contact': ContactSectionSerializer(contact).data if contact else {},
+            'contact': ContactSectionSerializer(contact, context=context).data if contact else {},
             'navbar': NavbarSettingsSerializer(navbar).data if navbar else {},
             'footer': FooterSettingsSerializer(footer).data if footer else {},
+            'site_settings': SiteSettingsSerializer(site_settings, context=context).data if site_settings else {},
         }
 
         return Response(data, status=status.HTTP_200_OK)
@@ -198,6 +214,22 @@ class FooterSettingsView(APIView):
                 {'label': 'Terms of Service', 'href': '#'},
                 {'label': 'Cookie Policy', 'href': '#'}
             ]
+        }, status=status.HTTP_200_OK)
+
+
+class SiteSettingsView(APIView):
+    """Get active site settings including favicon"""
+    
+    def get(self, request):
+        site_settings = SiteSettings.objects.filter(is_active=True).first()
+        if site_settings:
+            serializer = SiteSettingsSerializer(site_settings, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        # Return default if no settings exist
+        return Response({
+            'site_title': 'Dr. Abul Khayer (Biplob)',
+            'favicon_url': None,
+            'site_description': None
         }, status=status.HTTP_200_OK)
 
 
@@ -405,11 +437,12 @@ def admin_video_create(request):
         video = Video()
         video.title = request.POST.get('title', '')
         video.description = request.POST.get('description', '')
-        video.thumbnail_url = request.POST.get('thumbnail_url', '')
         video.video_url = request.POST.get('video_url', '')
         video.duration = request.POST.get('duration', '05 MINS')
         video.order = int(request.POST.get('order', 0))
         video.is_active = request.POST.get('is_active') == 'on'
+        if 'thumbnail' in request.FILES:
+            video.thumbnail = request.FILES['thumbnail']
         video.save()
         messages.success(request, 'Video created successfully!')
         return redirect('admin-video-list')
@@ -422,11 +455,12 @@ def admin_video_edit(request, pk):
     if request.method == 'POST':
         video.title = request.POST.get('title', '')
         video.description = request.POST.get('description', '')
-        video.thumbnail_url = request.POST.get('thumbnail_url', '')
         video.video_url = request.POST.get('video_url', '')
         video.duration = request.POST.get('duration', '05 MINS')
         video.order = int(request.POST.get('order', 0))
         video.is_active = request.POST.get('is_active') == 'on'
+        if 'thumbnail' in request.FILES:
+            video.thumbnail = request.FILES['thumbnail']
         video.save()
         messages.success(request, 'Video updated successfully!')
         return redirect('admin-video-list')
@@ -458,9 +492,10 @@ def admin_testimonial_create(request):
         testimonial.role = request.POST.get('role', '')
         testimonial.content = request.POST.get('content', '')
         testimonial.rating = int(request.POST.get('rating', 5))
-        testimonial.image_url = request.POST.get('image_url', '')
         testimonial.order = int(request.POST.get('order', 0))
         testimonial.is_active = request.POST.get('is_active') == 'on'
+        if 'image' in request.FILES:
+            testimonial.image = request.FILES['image']
         testimonial.save()
         messages.success(request, 'Testimonial created successfully!')
         return redirect('admin-testimonial-list')
@@ -475,9 +510,10 @@ def admin_testimonial_edit(request, pk):
         testimonial.role = request.POST.get('role', '')
         testimonial.content = request.POST.get('content', '')
         testimonial.rating = int(request.POST.get('rating', 5))
-        testimonial.image_url = request.POST.get('image_url', '')
         testimonial.order = int(request.POST.get('order', 0))
         testimonial.is_active = request.POST.get('is_active') == 'on'
+        if 'image' in request.FILES:
+            testimonial.image = request.FILES['image']
         testimonial.save()
         messages.success(request, 'Testimonial updated successfully!')
         return redirect('admin-testimonial-list')
@@ -553,11 +589,12 @@ def admin_contact_create(request):
         contact.badge_text = request.POST.get('badge_text', '')
         contact.title = request.POST.get('title', '')
         contact.description = request.POST.get('description', '')
-        contact.image_url = request.POST.get('image_url', '')
         contact.image_alt = request.POST.get('image_alt', '')
         contact.show_virtual_consultations = request.POST.get('show_virtual_consultations') == 'on'
         contact.show_in_person_visits = request.POST.get('show_in_person_visits') == 'on'
         contact.is_active = request.POST.get('is_active') == 'on'
+        if 'image' in request.FILES:
+            contact.image = request.FILES['image']
         contact.save()
         messages.success(request, 'Contact section created successfully!')
         return redirect('admin-contact-list')
@@ -571,11 +608,12 @@ def admin_contact_edit(request, pk):
         contact.badge_text = request.POST.get('badge_text', '')
         contact.title = request.POST.get('title', '')
         contact.description = request.POST.get('description', '')
-        contact.image_url = request.POST.get('image_url', '')
         contact.image_alt = request.POST.get('image_alt', '')
         contact.show_virtual_consultations = request.POST.get('show_virtual_consultations') == 'on'
         contact.show_in_person_visits = request.POST.get('show_in_person_visits') == 'on'
         contact.is_active = request.POST.get('is_active') == 'on'
+        if 'image' in request.FILES:
+            contact.image = request.FILES['image']
         contact.save()
         messages.success(request, 'Contact section updated successfully!')
         return redirect('admin-contact-list')
@@ -696,3 +734,24 @@ def admin_footer_edit(request):
         'footer_links_json': json.dumps(footer.footer_links, indent=2) if footer.footer_links else '[]',
     }
     return render(request, 'portfolio/footer_form.html', footer_data)
+
+
+# Site Settings CRUD
+@staff_member_required
+def admin_site_settings_edit(request):
+    site_settings = SiteSettings.objects.first()
+    if not site_settings:
+        site_settings = SiteSettings()
+        site_settings.save()
+
+    if request.method == 'POST':
+        site_settings.site_title = request.POST.get('site_title', '')
+        site_settings.site_description = request.POST.get('site_description', '')
+        site_settings.is_active = request.POST.get('is_active') == 'on'
+        if 'favicon' in request.FILES:
+            site_settings.favicon = request.FILES['favicon']
+        site_settings.save()
+        messages.success(request, 'Site settings updated successfully!')
+        return redirect('admin-site-settings-edit')
+    
+    return render(request, 'portfolio/site_settings_form.html', {'site_settings': site_settings})

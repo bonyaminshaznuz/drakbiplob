@@ -1,93 +1,252 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto">
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Navbar Settings</h1>
-        <p class="text-gray-600">Configure navigation bar content and menu items</p>
+<div class="w-full max-w-5xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-6 overflow-x-hidden">
+    <div class="mb-4 sm:mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Navbar Settings</h1>
+        <p class="text-sm sm:text-base text-gray-600">Configure navigation bar content and menu items</p>
     </div>
 
-    <form method="post" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-8">
+    <form method="post" class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 lg:space-y-8 w-full overflow-x-hidden">
         {% csrf_token %}
         
-        <div class="border-b border-gray-200 pb-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Brand/Logo Information</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="border-b border-gray-200 pb-4 sm:pb-6">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Brand/Logo Information</h2>
+            <div class="space-y-4 sm:space-y-6">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Logo Icon (Font Awesome)</label>
-                    <input type="text" name="logo_icon" value="{{ navbar.logo_icon|default:'fas fa-stethoscope' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="fas fa-stethoscope" required>
-                    <p class="mt-2 text-xs text-gray-500">Example: fas fa-stethoscope</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="logo-icon-input" name="logo_icon" value="{{ navbar.logo_icon|default:'fas fa-stethoscope' }}" class="flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" placeholder="fas fa-stethoscope" required>
+                        <button type="button" onclick="openIconPicker('logo-icon-input')" class="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-lg transition-colors whitespace-nowrap">
+                            <i class="fas fa-icons mr-1 sm:mr-2"></i>Pick
+                        </button>
+                    </div>
+                    <div id="logo-icon-preview" class="mt-3 flex flex-wrap items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg sm:rounded-xl">
+                        <span class="text-gray-500 text-xs sm:text-sm">Preview:</span>
+                        <i id="logo-preview-icon" class="text-xl sm:text-2xl text-gray-400"></i>
+                        <span id="logo-preview-text" class="text-xs sm:text-sm text-gray-500 break-all"></span>
+                    </div>
                 </div>
-                <div class="md:col-span-2">
+                <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Doctor Name</label>
-                    <input type="text" name="doctor_name" value="{{ navbar.doctor_name|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    <input type="text" name="doctor_name" value="{{ navbar.doctor_name|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" required>
                 </div>
-            </div>
-            <div class="mt-6">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Doctor Title</label>
-                <input type="text" name="doctor_title" value="{{ navbar.doctor_title|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Doctor Title</label>
+                    <input type="text" name="doctor_title" value="{{ navbar.doctor_title|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                </div>
             </div>
         </div>
 
-        <div class="border-b border-gray-200 pb-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Contact Information (Top Bar)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="border-b border-gray-200 pb-4 sm:pb-6">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Contact Information (Top Bar)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
-                    <input type="text" name="phone_number" value="{{ navbar.phone_number|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="text" name="phone_number" value="{{ navbar.phone_number|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
-                    <input type="email" name="email" value="{{ navbar.email|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="email" name="email" value="{{ navbar.email|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                 </div>
-                <div>
+                <div class="sm:col-span-2 lg:col-span-1">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Working Hours</label>
-                    <input type="text" name="working_hours" value="{{ navbar.working_hours|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Mon - Fri: 9:00 AM - 6:00 PM">
+                    <input type="text" name="working_hours" value="{{ navbar.working_hours|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" placeholder="Mon - Fri: 9:00 AM - 6:00 PM">
                 </div>
             </div>
         </div>
 
-        <div class="border-b border-gray-200 pb-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Menu Items</h2>
-            <p class="text-sm text-gray-600 mb-4">Enter menu items as JSON array. Example:</p>
-            <pre class="bg-gray-50 p-4 rounded-xl text-xs text-gray-700 mb-4 overflow-x-auto">[
-  {"label": "Home", "href": "/"},
-  {"label": "About", "href": "/#about"},
-  {"label": "Services", "href": "/#services"},
-  {"label": "Blog", "href": "/#blog"},
-  {"label": "Contact", "href": "/#contact"}
-]</pre>
-            <textarea name="menu_items" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='[{"label": "Home", "href": "/"}, ...]' required>{{ menu_items_json|default:'[]' }}</textarea>
-            <p class="mt-2 text-xs text-gray-500">Note: Use "/" for React Router links, "#section" for page anchors</p>
+        <div class="border-b border-gray-200 pb-4 sm:pb-6 overflow-hidden w-full">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Menu Items</h2>
+            <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Enter menu items as JSON array. Example:</p>
+            <pre class="bg-gray-50 p-3 sm:p-4 rounded-lg sm:rounded-xl text-[10px] sm:text-xs text-gray-700 mb-3 sm:mb-4 overflow-x-auto whitespace-pre-wrap break-words w-full max-w-full">{{ '[\n  {"label": "Home", "href": "/"},\n  {"label": "About", "href": "/#about"},\n  {"label": "Services", "href": "/#services"},\n  {"label": "Blog", "href": "/#blog"},\n  {"label": "Contact", "href": "/#contact"}\n]' }}</pre>
+            <textarea name="menu_items" rows="6" class="w-full max-w-full min-w-0 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs sm:text-sm resize-y overflow-x-auto break-words" placeholder='[{"label": "Home", "href": "/"}, ...]' required>{{ menu_items_json|default:'[]' }}</textarea>
+            <p class="mt-2 text-[10px] sm:text-xs text-gray-500">Note: Use "/" for React Router links, "#section" for page anchors</p>
         </div>
 
-        <div class="border-b border-gray-200 pb-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Appointment Button</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+        <div class="border-b border-gray-200 pb-4 sm:pb-6 overflow-hidden w-full">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Appointment Button</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full">
+                <div class="overflow-hidden w-full min-w-0">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Button Text</label>
-                    <input type="text" name="appointment_button_text" value="{{ navbar.appointment_button_text|default:'Book Appointment' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="text" name="appointment_button_text" value="{{ navbar.appointment_button_text|default:'Book Appointment' }}" class="w-full max-w-full min-w-0 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
                 </div>
-                <div>
+                <div class="overflow-hidden w-full min-w-0">
                     <label class="block text-sm font-bold text-gray-700 mb-2">Button Icon (Font Awesome)</label>
-                    <input type="text" name="appointment_button_icon" value="{{ navbar.appointment_button_icon|default:'fas fa-calendar-check' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="fas fa-calendar-check">
+                    <div class="flex flex-col sm:flex-row gap-2 w-full">
+                        <input type="text" id="button-icon-input" name="appointment_button_icon" value="{{ navbar.appointment_button_icon|default:'fas fa-calendar-check' }}" class="flex-1 min-w-0 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" placeholder="fas fa-calendar-check">
+                        <button type="button" onclick="openIconPicker('button-icon-input')" class="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-lg transition-colors whitespace-nowrap flex-shrink-0">
+                            <i class="fas fa-icons mr-1 sm:mr-2"></i>Pick
+                        </button>
+                    </div>
+                    <div id="button-icon-preview" class="mt-3 flex flex-wrap items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg sm:rounded-xl w-full">
+                        <span class="text-gray-500 text-xs sm:text-sm flex-shrink-0">Preview:</span>
+                        <i id="button-preview-icon" class="text-xl sm:text-2xl text-gray-400 flex-shrink-0"></i>
+                        <span id="button-preview-text" class="text-xs sm:text-sm text-gray-500 break-all min-w-0"></span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center">
-            <input type="checkbox" name="is_active" {% if navbar.is_active or not navbar %}checked{% endif %} class="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-            <label class="ml-3 text-sm font-semibold text-gray-700">Active (Display on website)</label>
+        <div class="flex items-center pt-2 sm:pt-4">
+            <input type="checkbox" name="is_active" {% if navbar.is_active or not navbar %}checked{% endif %} class="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 flex-shrink-0">
+            <label class="ml-2 sm:ml-3 text-xs sm:text-sm font-semibold text-gray-700">Active (Display on website)</label>
         </div>
 
-        <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-colors">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-lg transition-colors">
                 <i class="fas fa-save mr-2"></i>Save Settings
             </button>
-            <a href="{% url 'admin-portfolio-dashboard' %}" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+            <a href="{% url 'admin-portfolio-dashboard' %}" class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm sm:text-base hover:bg-gray-50 transition-colors text-center">
                 Back to Dashboard
             </a>
         </div>
     </form>
 </div>
+
+<!-- Icon Picker Modal -->
+<div id="icon-picker-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] flex flex-col m-2 sm:m-4 overflow-hidden">
+        <div class="p-4 sm:p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-3 sm:mb-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Select Font Awesome Icon</h2>
+                <button onclick="closeIconPicker()" class="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl leading-none">&times;</button>
+            </div>
+            <div class="mt-3 sm:mt-4">
+                <input type="text" id="icon-search" placeholder="Search icons (e.g., heart, syringe)" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+            </div>
+        </div>
+        <div id="icon-grid" class="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 sm:gap-3">
+            <!-- Icons will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome 6.5.1 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script>
+// Font Awesome 6.5.1 Icon List (Same as service_form.html)
+const fontAwesomeIcons = [
+    'fas fa-heartbeat', 'fas fa-heart', 'fas fa-stethoscope', 'fas fa-user-md', 'fas fa-hospital',
+    'fas fa-ambulance', 'fas fa-pills', 'fas fa-syringe', 'fas fa-x-ray', 'fas fa-band-aid',
+    'fas fa-lungs', 'fas fa-brain', 'fas fa-tooth', 'fas fa-eye', 'fas fa-ear',
+    'fas fa-hand-holding-medical', 'fas fa-procedures', 'fas fa-notes-medical', 'fas fa-file-medical',
+    'fas fa-prescription-bottle', 'fas fa-capsules', 'fas fa-thermometer-half', 'fas fa-microscope',
+    'fas fa-home', 'fas fa-user', 'fas fa-users', 'fas fa-envelope', 'fas fa-phone',
+    'fas fa-calendar', 'fas fa-calendar-check', 'fas fa-clock', 'fas fa-map-marker-alt', 'fas fa-globe',
+    'fas fa-link', 'fas fa-image', 'fas fa-video', 'fas fa-music', 'fas fa-file', 'fas fa-folder',
+    'fas fa-search', 'fas fa-bell', 'fas fa-star', 'fas fa-thumbs-up', 'fas fa-share', 'fas fa-download',
+    'fas fa-upload', 'fas fa-print', 'fas fa-edit', 'fas fa-trash', 'fas fa-save', 'fas fa-check',
+    'fas fa-times', 'fas fa-plus', 'fas fa-minus', 'fas fa-arrow-right', 'fas fa-arrow-left',
+    'fas fa-chevron-right', 'fas fa-chevron-left', 'fas fa-bars', 'fas fa-cog', 'fas fa-wrench',
+    'fas fa-lock', 'fas fa-unlock', 'fas fa-key', 'fas fa-shield-alt', 'fas fa-info-circle',
+    'fas fa-briefcase', 'fas fa-building', 'fas fa-store', 'fas fa-shopping-cart', 'fas fa-chart-line',
+    'fas fa-handshake', 'fas fa-award', 'fas fa-trophy', 'fas fa-medal', 'fas fa-certificate',
+    'fas fa-graduation-cap', 'fas fa-book', 'fas fa-laptop', 'fas fa-desktop', 'fas fa-mobile-alt',
+    'fas fa-comments', 'fas fa-comment', 'fas fa-paper-plane', 'fas fa-inbox', 'fab fa-facebook',
+    'fab fa-twitter', 'fab fa-instagram', 'fab fa-linkedin', 'fab fa-youtube', 'fab fa-github',
+    'fas fa-car', 'fas fa-bus', 'fas fa-train', 'fas fa-plane', 'fas fa-sun', 'fas fa-moon',
+    'fas fa-cloud', 'fas fa-tree', 'fas fa-fire', 'fas fa-water', 'fas fa-lightbulb', 'fas fa-play',
+    'fas fa-pause', 'fas fa-stop', 'fas fa-redo', 'fas fa-undo', 'fas fa-refresh', 'fas fa-spinner'
+];
+
+let currentIconInput = null;
+
+function openIconPicker(inputId) {
+    currentIconInput = document.getElementById(inputId);
+    document.getElementById('icon-picker-modal').classList.remove('hidden');
+    loadIcons();
+    updatePreview();
+}
+
+function closeIconPicker() {
+    document.getElementById('icon-picker-modal').classList.add('hidden');
+    document.getElementById('icon-search').value = '';
+    currentIconInput = null;
+}
+
+function loadIcons(searchTerm = '') {
+    const grid = document.getElementById('icon-grid');
+    grid.innerHTML = '';
+    
+    const filteredIcons = fontAwesomeIcons.filter(icon => {
+        const iconName = icon.replace('fas fa-', '').replace('fab fa-', '');
+        return iconName.includes(searchTerm.toLowerCase());
+    });
+    
+    filteredIcons.forEach(icon => {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all min-h-[80px] sm:min-h-[100px]';
+        iconDiv.onclick = () => selectIcon(icon);
+        
+        const iconElement = document.createElement('i');
+        iconElement.className = icon + ' text-xl sm:text-2xl text-gray-700 mb-1 sm:mb-2';
+        iconDiv.appendChild(iconElement);
+        
+        const iconText = document.createElement('span');
+        iconText.className = 'text-[10px] sm:text-xs text-gray-600 text-center break-all px-1';
+        iconText.textContent = icon;
+        iconDiv.appendChild(iconText);
+        
+        grid.appendChild(iconDiv);
+    });
+    
+    if (filteredIcons.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No icons found</div>';
+    }
+}
+
+function selectIcon(icon) {
+    if (currentIconInput) {
+        currentIconInput.value = icon;
+        updatePreview();
+        closeIconPicker();
+    }
+}
+
+function updatePreview() {
+    const logoInput = document.getElementById('logo-icon-input');
+    const buttonInput = document.getElementById('button-icon-input');
+    
+    if (logoInput && logoInput.value) {
+        document.getElementById('logo-preview-icon').className = logoInput.value + ' text-2xl text-blue-600';
+        document.getElementById('logo-preview-text').textContent = logoInput.value;
+        document.getElementById('logo-icon-preview').classList.remove('hidden');
+    }
+    
+    if (buttonInput && buttonInput.value) {
+        document.getElementById('button-preview-icon').className = buttonInput.value + ' text-2xl text-blue-600';
+        document.getElementById('button-preview-text').textContent = buttonInput.value;
+        document.getElementById('button-icon-preview').classList.remove('hidden');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('icon-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            loadIcons(e.target.value);
+        });
+    }
+    
+    const logoInput = document.getElementById('logo-icon-input');
+    const buttonInput = document.getElementById('button-icon-input');
+    
+    if (logoInput) {
+        logoInput.addEventListener('input', updatePreview);
+    }
+    if (buttonInput) {
+        buttonInput.addEventListener('input', updatePreview);
+    }
+    
+    updatePreview();
+    
+    document.getElementById('icon-picker-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeIconPicker();
+        }
+    });
+});
+</script>
 {% endblock %}
