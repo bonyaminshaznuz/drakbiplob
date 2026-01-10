@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            background: #0ea5e9;
+            color: white;
+            padding: 30px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+
+        .content {
+            background: #f9fafb;
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .status-box {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .status-pending {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .status-confirmed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .details {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 20px;
+        }
+
+        .button {
+            background: #0ea5e9;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Appointment Notification</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{ appointment.full_name }}</strong>,</p>
+
+            {% if event_type == 'booked' %}
+            <p>Thank you for choosing Dr. Abul Khayer (Biplob). Your appointment request has been received.</p>
+            <div class="status-box status-pending">Status: Pending Confirmation</div>
+            {% elif event_type == 'updated' %}
+            <p>Your appointment details have been updated. Our team will review the changes.</p>
+            <div class="status-box status-pending">Status: Re-pending Confirmation</div>
+            {% elif event_type == 'confirmed' %}
+            <p>Great news! Your appointment has been officially confirmed.</p>
+            <div class="status-box status-confirmed">Status: Confirmed</div>
+            {% elif event_type == 'cancelled' %}
+            <p>We are sorry to inform you that your appointment has been cancelled.</p>
+            <div class="status-box status-cancelled">Status: Cancelled</div>
+            {% endif %}
+
+            <div class="details">
+                <p><strong>Appointment ID:</strong> {{ formatted_id }}</p>
+                <p><strong>Date:</strong> {{ appointment.slot.date }}</p>
+                <p><strong>Time:</strong> {{ appointment.slot.time }}</p>
+                <p><strong>Reason:</strong> {{ appointment.reason }}</p>
+            </div>
+
+            <p>You can view or manage your appointment anytime on our website using your ID and Date of Birth.</p>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="https://drakbiplob.com/appointment-manage" class="button">Manage Appointment</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Dr. Abul Khayer (Biplob). All rights reserved.</p>
+            <p>This is an automated message. Please do not reply directly to this email.</p>
+        </div>
+    </div>
+</body>
+
+</html>

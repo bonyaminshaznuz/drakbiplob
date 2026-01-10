@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Navbar Settings</h1>
+        <p class="text-gray-600">Configure navigation bar content and menu items</p>
+    </div>
+
+    <form method="post" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-8">
+        {% csrf_token %}
+        
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Brand/Logo Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Logo Icon (Font Awesome)</label>
+                    <input type="text" name="logo_icon" value="{{ navbar.logo_icon|default:'fas fa-stethoscope' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="fas fa-stethoscope" required>
+                    <p class="mt-2 text-xs text-gray-500">Example: fas fa-stethoscope</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Doctor Name</label>
+                    <input type="text" name="doctor_name" value="{{ navbar.doctor_name|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                </div>
+            </div>
+            <div class="mt-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Doctor Title</label>
+                <input type="text" name="doctor_title" value="{{ navbar.doctor_title|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Contact Information (Top Bar)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+                    <input type="text" name="phone_number" value="{{ navbar.phone_number|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                    <input type="email" name="email" value="{{ navbar.email|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Working Hours</label>
+                    <input type="text" name="working_hours" value="{{ navbar.working_hours|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Mon - Fri: 9:00 AM - 6:00 PM">
+                </div>
+            </div>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Menu Items</h2>
+            <p class="text-sm text-gray-600 mb-4">Enter menu items as JSON array. Example:</p>
+            <pre class="bg-gray-50 p-4 rounded-xl text-xs text-gray-700 mb-4 overflow-x-auto">[
+  {"label": "Home", "href": "/"},
+  {"label": "About", "href": "/#about"},
+  {"label": "Services", "href": "/#services"},
+  {"label": "Blog", "href": "/#blog"},
+  {"label": "Contact", "href": "/#contact"}
+]</pre>
+            <textarea name="menu_items" rows="8" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='[{"label": "Home", "href": "/"}, ...]' required>{{ menu_items_json|default:'[]' }}</textarea>
+            <p class="mt-2 text-xs text-gray-500">Note: Use "/" for React Router links, "#section" for page anchors</p>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Appointment Button</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Button Text</label>
+                    <input type="text" name="appointment_button_text" value="{{ navbar.appointment_button_text|default:'Book Appointment' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Button Icon (Font Awesome)</label>
+                    <input type="text" name="appointment_button_icon" value="{{ navbar.appointment_button_icon|default:'fas fa-calendar-check' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="fas fa-calendar-check">
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center">
+            <input type="checkbox" name="is_active" {% if navbar.is_active or not navbar %}checked{% endif %} class="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+            <label class="ml-3 text-sm font-semibold text-gray-700">Active (Display on website)</label>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>Save Settings
+            </button>
+            <a href="{% url 'admin-portfolio-dashboard' %}" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                Back to Dashboard
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

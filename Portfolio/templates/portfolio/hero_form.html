@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <a href="{% url 'admin-hero-list' %}" class="text-blue-600 hover:text-blue-800 font-semibold mb-4 inline-block">
+            <i class="fas fa-arrow-left mr-2"></i>Back to List
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ action }} Hero Section</h1>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-6">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Badge Text</label>
+                <input type="text" name="badge_text" value="{{ hero.badge_text|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Top Rated Specialist">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Image Alt Text</label>
+                <input type="text" name="image_alt" value="{{ hero.image_alt|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Title Line 1</label>
+            <input type="text" name="title_line1" value="{{ hero.title_line1|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Your Health,">
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Title Line 2</label>
+            <input type="text" name="title_line2" value="{{ hero.title_line2|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Our Priority">
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+            <textarea name="description" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Expert care in Anaesthesiology...">{{ hero.description|default:'' }}</textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Image</label>
+            {% if hero.image %}
+            <div class="mb-3">
+                <img src="{{ hero.image.url }}" alt="Current image" class="h-32 w-auto rounded-xl border border-gray-300">
+            </div>
+            {% endif %}
+            <input type="file" name="image" accept="image/*" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Video URL (Optional)</label>
+            <input type="url" name="video_url" value="{{ hero.video_url|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://youtube.com/...">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Years Experience</label>
+                <input type="text" name="years_experience" value="{{ hero.years_experience|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="12+">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Patients Count</label>
+                <input type="text" name="patients_count" value="{{ hero.patients_count|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="5k+">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Emergency Availability</label>
+                <input type="text" name="emergency_availability" value="{{ hero.emergency_availability|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="24/7">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Rating</label>
+            <input type="number" step="0.1" name="rating" value="{{ hero.rating|default:4.9 }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="0" max="5">
+        </div>
+
+        <div class="flex items-center">
+            <input type="checkbox" name="is_active" {% if hero.is_active or not hero %}checked{% endif %} class="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+            <label class="ml-3 text-sm font-semibold text-gray-700">Active (Display on website)</label>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>Save
+            </button>
+            <a href="{% url 'admin-hero-list' %}" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

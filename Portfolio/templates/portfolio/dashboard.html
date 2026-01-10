@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Portfolio Management</h1>
+            <p class="text-gray-600">Manage your website content and portfolio sections</p>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-star text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ hero_count }}</h3>
+            <p class="text-sm text-gray-500">Hero Sections</p>
+            <a href="{% url 'admin-hero-list' %}" class="text-blue-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-concierge-bell text-green-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ service_count }}</h3>
+            <p class="text-sm text-gray-500">Services</p>
+            <a href="{% url 'admin-service-list' %}" class="text-green-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-video text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ video_count }}</h3>
+            <p class="text-sm text-gray-500">Videos</p>
+            <a href="{% url 'admin-video-list' %}" class="text-purple-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-quote-left text-yellow-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ testimonial_count }}</h3>
+            <p class="text-sm text-gray-500">Testimonials</p>
+            <a href="{% url 'admin-testimonial-list' %}" class="text-yellow-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-book text-indigo-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ research_count }}</h3>
+            <p class="text-sm text-gray-500">Research Papers</p>
+            <a href="{% url 'admin-research-list' %}" class="text-indigo-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-pink-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-user text-pink-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ about_count }}</h3>
+            <p class="text-sm text-gray-500">About Sections</p>
+            <a href="{% url 'admin-about-list' %}" class="text-pink-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-red-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-phone text-red-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ contact_count }}</h3>
+            <p class="text-sm text-gray-500">Contact Sections</p>
+            <a href="{% url 'admin-contact-list' %}" class="text-red-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <a href="{% url 'admin-hero-create' %}" class="flex items-center gap-3 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors">
+                <i class="fas fa-plus-circle text-blue-600"></i>
+                <span class="font-semibold text-blue-900">Add Hero Section</span>
+            </a>
+            <a href="{% url 'admin-service-create' %}" class="flex items-center gap-3 p-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors">
+                <i class="fas fa-plus-circle text-green-600"></i>
+                <span class="font-semibold text-green-900">Add Service</span>
+            </a>
+            <a href="{% url 'admin-video-create' %}" class="flex items-center gap-3 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors">
+                <i class="fas fa-plus-circle text-purple-600"></i>
+                <span class="font-semibold text-purple-900">Add Video</span>
+            </a>
+        </div>
+        
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Navigation Settings</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="{% url 'admin-navbar-edit' %}" class="flex items-center gap-3 p-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                <i class="fas fa-bars text-indigo-600"></i>
+                <span class="font-semibold text-indigo-900">Edit Navbar Settings</span>
+            </a>
+            <a href="{% url 'admin-footer-edit' %}" class="flex items-center gap-3 p-4 rounded-xl bg-teal-50 hover:bg-teal-100 transition-colors">
+                <i class="fas fa-window-minimize text-teal-600"></i>
+                <span class="font-semibold text-teal-900">Edit Footer Settings</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

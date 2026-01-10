@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Testimonials</h1>
+            <p class="text-gray-600">Manage patient testimonials</p>
+        </div>
+        <a href="{% url 'admin-testimonial-create' %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>Add New
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Rating</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for testimonial in testimonials %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-semibold text-gray-900">{{ testimonial.name }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ testimonial.role }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= testimonial.rating %}
+                                <i class="fas fa-star text-yellow-400"></i>
+                                {% else %}
+                                <i class="far fa-star text-gray-300"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if testimonial.is_active %}
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">Active</span>
+                            {% else %}
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <a href="{% url 'admin-testimonial-edit' testimonial.pk %}" class="text-blue-600 hover:text-blue-800 font-semibold">Edit</a>
+                            <a href="{% url 'admin-testimonial-delete' testimonial.pk %}" class="text-red-600 hover:text-red-800 font-semibold">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No testimonials found. <a href="{% url 'admin-testimonial-create' %}" class="text-yellow-600 hover:underline">Create one?</a></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex items-center gap-4">
+        <div
+            class="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
+            <i class="fas fa-envelope text-xl"></i>
+        </div>
+        <div>
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Mailjet API Settings</h1>
+            <p class="text-sm text-gray-500 font-medium">Configure Mailjet API credentials for email notifications</p>
+        </div>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <form method="POST" class="p-6 md:p-8 space-y-6">
+            {% csrf_token %}
+            
+            <!-- Mailjet API Configuration Section -->
+            <div class="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 p-6 rounded-2xl border border-blue-100">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-700">Mailjet API Configuration</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Mailjet API Key -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase ml-1">Mailjet API Key {% if not config %}<span class="text-red-500">*</span>{% endif %}</label>
+                        <input type="text" name="mailjet_api_key" value="{{ config.mailjet_api_key|default:'' }}"
+                            placeholder="Enter your Mailjet API Key"
+                            {% if not config %}required{% endif %}
+                            class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-white focus:border-blue-500 transition-all outline-none font-semibold shadow-sm">
+                        {% if config %}
+                        <p class="text-[10px] text-gray-400 mt-1 ml-1 font-medium italic">* Leave blank to keep current key</p>
+                        {% else %}
+                        <p class="text-[10px] text-gray-400 mt-1 ml-1 font-medium italic">* Required for initial setup</p>
+                        {% endif %}
+                    </div>
+                    <!-- Mailjet API Secret -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase ml-1">Mailjet API Secret {% if not config %}<span class="text-red-500">*</span>{% endif %}</label>
+                        <input type="password" name="mailjet_api_secret" value=""
+                            placeholder="Enter your Mailjet API Secret"
+                            {% if not config %}required{% endif %}
+                            class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-white focus:border-blue-500 transition-all outline-none font-semibold shadow-sm">
+                        {% if config %}
+                        <p class="text-[10px] text-gray-400 mt-1 ml-1 font-medium italic">* Leave blank to keep current secret</p>
+                        {% else %}
+                        <p class="text-[10px] text-gray-400 mt-1 ml-1 font-medium italic">* Required for initial setup</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Settings Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- From Email -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase ml-1">From Email Address</label>
+                    <input type="text" name="default_from_email"
+                        value="{{ config.default_from_email|default:'Dr. Abul Khayer (Biplob) <your-email@gmail.com>' }}"
+                        required
+                        placeholder="Name <email@domain.com>"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 transition-all outline-none font-semibold">
+                    <p class="text-[10px] text-gray-400 mt-1 ml-1 font-medium italic">* Format: Name &lt;email@domain.com&gt;</p>
+                </div>
+                <!-- Admin Notification Email -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-400 uppercase ml-1">Admin Notification Email</label>
+                    <input type="email" name="admin_email" value="{{ config.admin_email|default:'' }}" required
+                        placeholder="admin@example.com"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:border-blue-500 transition-all outline-none font-semibold">
+                </div>
+            </div>
+
+            <!-- Admin Alert Info Box -->
+            <div class="bg-gray-50/50 p-6 rounded-2xl border border-dashed border-gray-200">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-700">Admin Alert Configuration</h3>
+                </div>
+                <p class="text-[10px] text-gray-500 ml-11 font-medium leading-relaxed">
+                    The admin email address above will receive copies of all appointment notifications including new bookings, updates, confirmations, and cancellations.
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-6 border-t border-gray-50 flex gap-4">
+                <button type="submit"
+                    class="bg-blue-600 text-white rounded-2xl py-4 px-10 font-extrabold hover:bg-blue-700 shadow-xl shadow-blue-100 transition-all active:scale-95">
+                    Save Configuration
+                </button>
+                <a href="{% url 'admin-appointment-list' %}"
+                    class="bg-gray-50 text-gray-600 rounded-2xl py-4 px-10 font-bold hover:bg-gray-100 transition-all">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Note -->
+    <div class="bg-blue-50/50 rounded-2xl p-6 border border-blue-100 shadow-sm shadow-blue-50">
+        <div class="flex gap-4">
+            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div>
+                <h4 class="text-sm font-extrabold text-blue-900 mb-1">Mailjet API Configuration</h4>
+                <p class="text-xs text-blue-700 leading-relaxed font-medium mb-2">
+                    To get your Mailjet API credentials:
+                </p>
+                <ol class="text-xs text-blue-700 leading-relaxed font-medium space-y-1 ml-4 list-decimal">
+                    <li>Sign up or log in to your <a href="https://www.mailjet.com" target="_blank" class="underline font-bold">Mailjet account</a></li>
+                    <li>Navigate to Account Settings → API Keys</li>
+                    <li>Copy your API Key and API Secret</li>
+                    <li>Paste them in the fields above</li>
+                </ol>
+                <p class="text-xs text-blue-700 leading-relaxed font-medium mt-3">
+                    <strong>Note:</strong> Leave API fields blank to keep your current credentials unchanged. The "From Email" must be verified in your Mailjet account.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

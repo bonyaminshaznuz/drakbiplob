@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Videos</h1>
+            <p class="text-gray-600">Manage educational videos</p>
+        </div>
+        <a href="{% url 'admin-video-create' %}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>Add New
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Title</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Duration</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Order</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for video in videos %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-semibold text-gray-900">{{ video.title }}</div>
+                            <div class="text-xs text-gray-500 mt-1">{{ video.description|truncatewords:10 }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ video.duration }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ video.order }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if video.is_active %}
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">Active</span>
+                            {% else %}
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <a href="{% url 'admin-video-edit' video.pk %}" class="text-blue-600 hover:text-blue-800 font-semibold">Edit</a>
+                            <a href="{% url 'admin-video-delete' video.pk %}" class="text-red-600 hover:text-red-800 font-semibold">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No videos found. <a href="{% url 'admin-video-create' %}" class="text-purple-600 hover:underline">Create one?</a></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

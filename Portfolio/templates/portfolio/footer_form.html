@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Footer Settings</h1>
+        <p class="text-gray-600">Configure footer content, links, and social media</p>
+    </div>
+
+    <form method="post" class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-8">
+        {% csrf_token %}
+        
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Brand Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Logo Icon</label>
+                    <input type="text" name="logo_icon" value="{{ footer.logo_icon|default:'fas fa-stethoscope' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="fas fa-stethoscope">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Doctor Name</label>
+                    <input type="text" name="doctor_name" value="{{ footer.doctor_name|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+            <div class="mt-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                <textarea name="description" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ footer.description|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Contact Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Address</label>
+                    <input type="text" name="address" value="{{ footer.address|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+                    <input type="text" name="phone_number" value="{{ footer.phone_number|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                    <input type="email" name="email" value="{{ footer.email|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Working Hours</label>
+                    <input type="text" name="working_hours" value="{{ footer.working_hours|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Links Section</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Section Title</label>
+                <input type="text" name="quick_links_title" value="{{ footer.quick_links_title|default:'Quick Links' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Quick Links (JSON Array)</label>
+            <textarea name="quick_links" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='[{"label": "Home", "href": "/"}, {"label": "About", "href": "/#about"}]'>{{ quick_links_json|default:'[]' }}</textarea>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Services Links Section</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Section Title</label>
+                <input type="text" name="services_title" value="{{ footer.services_title|default:'Our Services' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Services Links (JSON Array)</label>
+            <textarea name="services_links" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='[{"label": "Anaesthesia", "href": "#"}, {"label": "ICU", "href": "#"}]'>{{ services_links_json|default:'[]' }}</textarea>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Patient Resources Section</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Section Title</label>
+                <input type="text" name="resources_title" value="{{ footer.resources_title|default:'Patient Resources' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Resources Links (JSON Array)</label>
+            <textarea name="resources_links" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='[{"label": "Educational Videos", "href": "/#blog"}, {"label": "FAQ", "href": "#"}]'>{{ resources_links_json|default:'[]' }}</textarea>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Social Media Links</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Section Title</label>
+                <input type="text" name="social_media_title" value="{{ footer.social_media_title|default:'Follow Us' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Facebook URL</label>
+                    <input type="url" name="facebook_url" value="{{ footer.facebook_url|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://facebook.com/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Twitter URL</label>
+                    <input type="url" name="twitter_url" value="{{ footer.twitter_url|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://twitter.com/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">LinkedIn URL</label>
+                    <input type="url" name="linkedin_url" value="{{ footer.linkedin_url|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://linkedin.com/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Instagram URL</label>
+                    <input type="url" name="instagram_url" value="{{ footer.instagram_url|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://instagram.com/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">YouTube URL</label>
+                    <input type="url" name="youtube_url" value="{{ footer.youtube_url|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://youtube.com/...">
+                </div>
+            </div>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Footer Bottom</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Copyright Text</label>
+                <input type="text" name="copyright_text" value="{{ footer.copyright_text|default:'' }}" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Footer Links (JSON Array)</label>
+            <textarea name="footer_links" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='[{"label": "Privacy Policy", "href": "#"}, {"label": "Terms of Service", "href": "#"}]'>{{ footer_links_json|default:'[]' }}</textarea>
+        </div>
+
+        <div class="flex items-center">
+            <input type="checkbox" name="is_active" {% if footer.is_active or not footer %}checked{% endif %} class="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+            <label class="ml-3 text-sm font-semibold text-gray-700">Active (Display on website)</label>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>Save Settings
+            </button>
+            <a href="{% url 'admin-portfolio-dashboard' %}" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                Back to Dashboard
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
