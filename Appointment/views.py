@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import Http404
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import AvailableSlot, Appointment, MailSetting
@@ -330,3 +331,14 @@ def admin_mail_settings(request):
         return redirect('admin-mail-settings')
 
     return render(request, 'mail_settings.html', {'config': config})
+
+
+# Custom Error Handlers
+def custom_404_view(request, exception):
+    """Custom 404 error page handler"""
+    return render(request, '404.html', status=404)
+
+
+def custom_500_view(request):
+    """Custom 500 error page handler"""
+    return render(request, '500.html', status=500)

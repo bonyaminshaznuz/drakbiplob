@@ -4,6 +4,31 @@ import os
 from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings, SiteSettings
 
 
+def get_image_url(image_field, request=None):
+    """Helper function to get absolute URL for image fields"""
+    if not image_field:
+        return None
+    
+    try:
+        # Django's ImageField.url automatically includes MEDIA_URL prefix
+        # e.g., returns "/media/portfolio/hero/filename.jpg"
+        image_url = image_field.url
+        
+        if request:
+            # Use request to build absolute URL
+            return request.build_absolute_uri(image_url)
+        
+        # Fallback: construct URL manually using API_URL from settings
+        api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
+        # Ensure URL starts with /
+        if not image_url.startswith('/'):
+            image_url = f"/{image_url}"
+        return f"{api_url.rstrip('/')}{image_url}"
+    except Exception as e:
+        print(f"Error building image URL: {e}")
+        return None
+
+
 class HeroSectionSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
@@ -18,16 +43,8 @@ class HeroSectionSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         if obj.image:
             request = self.context.get('request')
-            if request:
-                try:
-                    return request.build_absolute_uri(obj.image.url)
-                except:
-                    pass
-            # Fallback: construct URL manually using API_URL from settings
-            api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
-            # Handle relative URL from image field
-            image_path = obj.image.url if obj.image.url.startswith('/') else f"/{obj.image.url}"
-            return f"{api_url.rstrip('/')}{image_path}"
+            return get_image_url(obj.image, request)
+        return None
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -50,16 +67,8 @@ class AboutSectionSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         if obj.image:
             request = self.context.get('request')
-            if request:
-                try:
-                    return request.build_absolute_uri(obj.image.url)
-                except:
-                    pass
-            # Fallback: construct URL manually using API_URL from settings
-            api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
-            # Handle relative URL from image field
-            image_path = obj.image.url if obj.image.url.startswith('/') else f"/{obj.image.url}"
-            return f"{api_url.rstrip('/')}{image_path}"
+            return get_image_url(obj.image, request)
+        return None
 
 
 class VideoSerializer(serializers.ModelSerializer):
@@ -73,16 +82,8 @@ class VideoSerializer(serializers.ModelSerializer):
         # Return uploaded thumbnail image URL
         if obj.thumbnail:
             request = self.context.get('request')
-            if request:
-                try:
-                    return request.build_absolute_uri(obj.thumbnail.url)
-                except:
-                    pass
-            # Fallback: construct URL manually using API_URL from settings
-            api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
-            # Handle relative URL from image field
-            image_path = obj.thumbnail.url if obj.thumbnail.url.startswith('/') else f"/{obj.thumbnail.url}"
-            return f"{api_url.rstrip('/')}{image_path}"
+            return get_image_url(obj.thumbnail, request)
+        return None
 
 
 class TestimonialSerializer(serializers.ModelSerializer):
@@ -96,16 +97,8 @@ class TestimonialSerializer(serializers.ModelSerializer):
         # Return uploaded image URL
         if obj.image:
             request = self.context.get('request')
-            if request:
-                try:
-                    return request.build_absolute_uri(obj.image.url)
-                except:
-                    pass
-            # Fallback: construct URL manually using API_URL from settings
-            api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
-            # Handle relative URL from image field
-            image_path = obj.image.url if obj.image.url.startswith('/') else f"/{obj.image.url}"
-            return f"{api_url.rstrip('/')}{image_path}"
+            return get_image_url(obj.image, request)
+        return None
 
 
 class ResearchSerializer(serializers.ModelSerializer):
@@ -128,16 +121,8 @@ class ContactSectionSerializer(serializers.ModelSerializer):
         # Return uploaded image URL
         if obj.image:
             request = self.context.get('request')
-            if request:
-                try:
-                    return request.build_absolute_uri(obj.image.url)
-                except:
-                    pass
-            # Fallback: construct URL manually using API_URL from settings
-            api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
-            # Handle relative URL from image field
-            image_path = obj.image.url if obj.image.url.startswith('/') else f"/{obj.image.url}"
-            return f"{api_url.rstrip('/')}{image_path}"
+            return get_image_url(obj.image, request)
+        return None
 
 
 class NavbarSettingsSerializer(serializers.ModelSerializer):
@@ -175,16 +160,7 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
         # Return uploaded favicon URL
         if obj.favicon:
             request = self.context.get('request')
-            if request:
-                try:
-                    return request.build_absolute_uri(obj.favicon.url)
-                except:
-                    pass
-            # Fallback: construct URL manually using API_URL from settings
-            api_url = settings.API_URL if hasattr(settings, 'API_URL') else os.getenv('API_URL', 'http://localhost:8000')
-            # Handle relative URL from image field
-            image_path = obj.favicon.url if obj.favicon.url.startswith('/') else f"/{obj.favicon.url}"
-            return f"{api_url.rstrip('/')}{image_path}"
+            return get_image_url(obj.favicon, request)
         return None
 
 

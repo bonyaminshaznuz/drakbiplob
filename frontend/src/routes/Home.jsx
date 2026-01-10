@@ -21,14 +21,23 @@ const Home = () => {
         const fetchPortfolioData = async () => {
             try {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/505ac12e-e307-46cb-96d7-8736582c9d0f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:23',message:'Fetching portfolio data',data:{apiUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
                 const response = await fetch(`${apiUrl}/api/portfolio/`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch portfolio data');
                 }
                 const data = await response.json();
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/505ac12e-e307-46cb-96d7-8736582c9d0f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:30',message:'Portfolio data received',data:{hero_image:data.hero?.image,about_image:data.about?.image,contact_image_url:data.contact?.image_url,has_hero:!!data.hero,has_about:!!data.about},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
                 setPortfolioData(data);
             } catch (err) {
                 console.error('Error fetching portfolio data:', err);
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/505ac12e-e307-46cb-96d7-8736582c9d0f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:34',message:'Error fetching portfolio data',data:{error:err.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -137,7 +146,15 @@ const Home = () => {
                                             src={hero.image || "/images/pp.jpg"}
                                             alt={hero.image_alt || "Dr. Abul Khayer"}
                                             className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-700"
+                                            onLoad={() => {
+                                                // #region agent log
+                                                fetch('http://127.0.0.1:7243/ingest/505ac12e-e307-46cb-96d7-8736582c9d0f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:137',message:'Hero image loaded successfully',data:{src:hero.image||'/images/pp.jpg'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                                                // #endregion
+                                            }}
                                             onError={(e) => {
+                                                // #region agent log
+                                                fetch('http://127.0.0.1:7243/ingest/505ac12e-e307-46cb-96d7-8736582c9d0f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:141',message:'Hero image failed to load',data:{failed_src:e.target.src,fallback_to:'/images/pp.jpg'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                                                // #endregion
                                                 e.target.src = "/images/pp.jpg";
                                             }}
                                         />

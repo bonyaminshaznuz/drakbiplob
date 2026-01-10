@@ -24,8 +24,20 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Appointment.urls')),
     path('', include('Portfolio.urls')),
-    # Serve media files in production
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-    # Serve static files in production
-    re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+# Serve media files - works in both development and production
+if settings.DEBUG:
+    # In development, use static() helper which automatically serves files
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # In production, serve media files manually
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+        re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+    ]
+
+# Custom error handlers
+handler404 = 'Appointment.views.custom_404_view'
+handler500 = 'Appointment.views.custom_500_view'
