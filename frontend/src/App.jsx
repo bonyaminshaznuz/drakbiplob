@@ -8,15 +8,31 @@ import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   useEffect(() => {
-    // Load dynamic favicon from API
-    const loadFavicon = async () => {
+    // Load dynamic favicon and title from API
+    const loadSiteSettings = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         const response = await fetch(`${apiUrl}/api/portfolio/site-settings/`);
         if (response.ok) {
           const data = await response.json();
-          const faviconUrl = data.favicon_url;
           
+          // Update title
+          if (data.site_title) {
+            document.title = data.site_title;
+            // Also update meta description if available
+            if (data.site_description) {
+              let metaDescription = document.querySelector('meta[name="description"]');
+              if (!metaDescription) {
+                metaDescription = document.createElement('meta');
+                metaDescription.name = 'description';
+                document.head.appendChild(metaDescription);
+              }
+              metaDescription.content = data.site_description;
+            }
+          }
+          
+          // Update favicon
+          const faviconUrl = data.favicon_url;
           if (faviconUrl) {
             // Remove existing favicon links
             const existingLinks = document.querySelectorAll("link[rel*='icon']");
@@ -51,11 +67,11 @@ function App() {
           }
         }
       } catch (error) {
-        console.error('Error loading favicon:', error);
+        console.error('Error loading site settings:', error);
       }
     };
     
-    loadFavicon();
+    loadSiteSettings();
   }, []);
 
   return (

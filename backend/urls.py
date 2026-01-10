@@ -25,6 +25,7 @@ urlpatterns = [
     path('', include('Portfolio.urls')),
 ]
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files (both development and production)
+# In production, you should ideally use nginx/apache to serve media files
+# but this will work for now
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
