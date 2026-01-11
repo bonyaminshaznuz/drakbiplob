@@ -220,9 +220,6 @@ class NavbarSettings(models.Model):
     email = models.EmailField(default="akbiplob36@gmail.com")
     working_hours = models.CharField(max_length=100, default="Mon - Fri: 9:00 AM - 6:00 PM")
     
-    # Navigation Menu Items (stored as JSON)
-    menu_items = models.JSONField(default=list, help_text="List of menu items with label and href")
-    
     # Appointment Button
     appointment_button_text = models.CharField(max_length=100, default="Book Appointment")
     appointment_button_icon = models.CharField(max_length=50, default="fas fa-calendar-check")
@@ -257,17 +254,12 @@ class FooterSettings(models.Model):
     email = models.EmailField(default="akbiplob36@gmail.com")
     working_hours = models.CharField(max_length=100, default="Mon - Fri: 9:00 AM - 6:00 PM")
     
-    # Quick Links
-    quick_links_title = models.CharField(max_length=100, default="Quick Links")
-    quick_links = models.JSONField(default=list, help_text="List of quick links with label and href")
-    
-    # Services Links
-    services_title = models.CharField(max_length=100, default="Our Services")
-    services_links = models.JSONField(default=list, help_text="List of service links")
-    
-    # Patient Resources
-    resources_title = models.CharField(max_length=100, default="Patient Resources")
-    resources_links = models.JSONField(default=list, help_text="List of resource links")
+    # Footer Sections (Dynamic)
+    # Format: [{"title": "Section Title", "links": [{"label": "Link Title", "href": "/link"}]}]
+    footer_sections = models.JSONField(
+        default=list, 
+        help_text="List of footer sections with title and links. Format: [{'title': 'Section Title', 'links': [{'label': 'Link Title', 'href': '/link'}]}]"
+    )
     
     # Social Media Links
     social_media_title = models.CharField(max_length=100, default="Follow Us")

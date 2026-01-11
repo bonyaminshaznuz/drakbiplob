@@ -159,13 +159,6 @@ class NavbarSettingsView(APIView):
             'phone_number': '+8801762037234',
             'email': 'akbiplob36@gmail.com',
             'working_hours': 'Mon - Fri: 9:00 AM - 6:00 PM',
-            'menu_items': [
-                {'label': 'Home', 'href': '/'},
-                {'label': 'About', 'href': '/#about'},
-                {'label': 'Services', 'href': '/#services'},
-                {'label': 'Blog', 'href': '/#blog'},
-                {'label': 'Contact', 'href': '/#contact'}
-            ],
             'appointment_button_text': 'Book Appointment',
             'appointment_button_icon': 'fas fa-calendar-check'
         }, status=status.HTTP_200_OK)
@@ -188,28 +181,36 @@ class FooterSettingsView(APIView):
             'phone_number': '+8801762037234',
             'email': 'akbiplob36@gmail.com',
             'working_hours': 'Mon - Fri: 9:00 AM - 6:00 PM',
-            'quick_links_title': 'Quick Links',
-            'quick_links': [
-                {'label': 'Home', 'href': '/'},
-                {'label': 'About Doctor', 'href': '/#about'},
-                {'label': 'Services', 'href': '/#services'},
-                {'label': 'Blog', 'href': '/#blog'},
-                {'label': 'Contact', 'href': '/#contact'}
-            ],
-            'services_title': 'Our Services',
-            'services_links': [
-                {'label': 'Anaesthesia', 'href': '#'},
-                {'label': 'Intensive Care', 'href': '#'},
-                {'label': 'Pain Management', 'href': '#'},
-                {'label': 'Diabetology', 'href': '#'},
-                {'label': 'Consultation', 'href': '#'}
-            ],
-            'resources_title': 'Patient Resources',
-            'resources_links': [
-                {'label': 'Educational Videos', 'href': '/#blog'},
-                {'label': 'FAQ', 'href': '#'},
-                {'label': 'Research Papers', 'href': '#'},
-                {'label': 'Book Appointment', 'href': '/appointment'}
+            'footer_sections': [
+                {
+                    'title': 'Quick Links',
+                    'links': [
+                        {'label': 'Home', 'href': '/'},
+                        {'label': 'About Doctor', 'href': '/#about'},
+                        {'label': 'Services', 'href': '/#services'},
+                        {'label': 'Blog', 'href': '/#blog'},
+                        {'label': 'Contact', 'href': '/#contact'}
+                    ]
+                },
+                {
+                    'title': 'Our Services',
+                    'links': [
+                        {'label': 'Anaesthesia', 'href': '#'},
+                        {'label': 'Intensive Care', 'href': '#'},
+                        {'label': 'Pain Management', 'href': '#'},
+                        {'label': 'Diabetology', 'href': '#'},
+                        {'label': 'Consultation', 'href': '#'}
+                    ]
+                },
+                {
+                    'title': 'Patient Resources',
+                    'links': [
+                        {'label': 'Educational Videos', 'href': '/#blog'},
+                        {'label': 'FAQ', 'href': '#'},
+                        {'label': 'Research Papers', 'href': '#'},
+                        {'label': 'Book Appointment', 'href': '/appointment'}
+                    ]
+                }
             ],
             'social_media_title': 'Follow Us',
             'copyright_text': 'Copyright © 2025 Dr. Abul Khayer (Biplob). All rights reserved.'
@@ -759,14 +760,6 @@ def admin_navbar_edit(request):
         navbar.email = request.POST.get('email', '')
         navbar.working_hours = request.POST.get('working_hours', '')
         
-        # Parse menu items from JSON or create default
-        menu_items_json = request.POST.get('menu_items', '[]')
-        try:
-            import json
-            navbar.menu_items = json.loads(menu_items_json) if menu_items_json else []
-        except:
-            navbar.menu_items = []
-        
         navbar.appointment_button_text = request.POST.get('appointment_button_text', '')
         navbar.appointment_button_icon = request.POST.get('appointment_button_icon', '')
         navbar.is_active = request.POST.get('is_active') == 'on'
@@ -774,11 +767,8 @@ def admin_navbar_edit(request):
         messages.success(request, 'Navbar settings updated successfully!')
         return redirect('admin-navbar-edit')
     
-    import json
-    # Convert menu_items to JSON string for template
     navbar_data = {
-        'navbar': navbar,
-        'menu_items_json': json.dumps(navbar.menu_items, indent=2) if navbar.menu_items else '[]'
+        'navbar': navbar
     }
     return render(request, 'portfolio/navbar_form.html', navbar_data)
 
@@ -800,28 +790,19 @@ def admin_footer_edit(request):
         footer.email = request.POST.get('email', '')
         footer.working_hours = request.POST.get('working_hours', '')
         
-        footer.quick_links_title = request.POST.get('quick_links_title', '')
-        services_title = request.POST.get('services_title', '')
-        resources_title = request.POST.get('resources_title', '')
         social_media_title = request.POST.get('social_media_title', '')
         
-        # Parse JSON fields
+        # Parse footer sections JSON
         import json
-        quick_links_json = request.POST.get('quick_links', '[]')
-        services_links_json = request.POST.get('services_links', '[]')
-        resources_links_json = request.POST.get('resources_links', '[]')
+        footer_sections_json = request.POST.get('footer_sections', '[]') or '[]'
         
         try:
-            footer.quick_links = json.loads(quick_links_json) if quick_links_json else []
-            footer.services_links = json.loads(services_links_json) if services_links_json else []
-            footer.resources_links = json.loads(resources_links_json) if resources_links_json else []
-        except:
-            footer.quick_links = []
-            footer.services_links = []
-            footer.resources_links = []
+            footer.footer_sections = json.loads(footer_sections_json) if footer_sections_json and footer_sections_json.strip() else []
+        except json.JSONDecodeError as e:
+            footer.footer_sections = []
+        except Exception as e:
+            footer.footer_sections = []
         
-        footer.services_title = services_title
-        footer.resources_title = resources_title
         footer.social_media_title = social_media_title
         footer.facebook_url = request.POST.get('facebook_url', '')
         footer.twitter_url = request.POST.get('twitter_url', '')
@@ -838,9 +819,7 @@ def admin_footer_edit(request):
     # Convert JSON fields to strings for template
     footer_data = {
         'footer': footer,
-        'quick_links_json': json.dumps(footer.quick_links, indent=2) if footer.quick_links else '[]',
-        'services_links_json': json.dumps(footer.services_links, indent=2) if footer.services_links else '[]',
-        'resources_links_json': json.dumps(footer.resources_links, indent=2) if footer.resources_links else '[]',
+        'footer_sections_json': json.dumps(footer.footer_sections if footer.footer_sections else [], indent=2, ensure_ascii=False),
     }
     return render(request, 'portfolio/footer_form.html', footer_data)
 

@@ -1,8 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const Footer = () => {
     const [footerData, setFooterData] = useState(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleHashClick = (e, hash) => {
+        if (location.pathname === '/') {
+            // If already on home page, smooth scroll to the hash section
+            e.preventDefault();
+            const element = document.querySelector(hash);
+            if (element) {
+                const navbarHeight = 120; // Approximate navbar height (includes top bar + header)
+                const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - navbarHeight;
+
+                window.scrollTo({
+                    top: Math.max(0, offsetPosition),
+                    behavior: 'smooth'
+                });
+                
+                // Update URL hash for shareable link
+                window.history.pushState(null, '', hash);
+            }
+        } else {
+            // If on another page, navigate to home with hash (ScrollToTop will handle the scroll)
+            e.preventDefault();
+            navigate(`/${hash}`);
+        }
+    };
 
     useEffect(() => {
         const fetchFooterData = async () => {
@@ -60,91 +87,92 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    <div>
-                        <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">{footerData?.quick_links_title || 'Quick Links'}</h3>
-                        <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                            {footerData?.quick_links && Array.isArray(footerData.quick_links) && footerData.quick_links.length > 0 ? (
-                                footerData.quick_links.map((link, index) => (
-                                    link.href && link.href.startsWith('/') ? (
-                                        <li key={index}>
-                                            <Link to={link.href} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
-                                                {link.label || link}
-                                            </Link>
-                                        </li>
-                                    ) : (
-                                        <li key={index}>
-                                            <a href={link.href || '#'} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
-                                                {link.label || link}
-                                            </a>
-                                        </li>
-                                    )
-                                ))
-                            ) : (
-                                <>
-                                    <li><Link to="/" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Home</Link></li>
-                                    <li><a href="/#about" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">About Doctor</a></li>
-                                    <li><a href="/#services" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Services</a></li>
-                                    <li><a href="/#blog" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Blog</a></li>
-                                    <li><a href="/#contact" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Contact</a></li>
-                                </>
-                            )}
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">{footerData?.services_title || 'Our Services'}</h3>
-                        <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                            {footerData?.services_links && Array.isArray(footerData.services_links) && footerData.services_links.length > 0 ? (
-                                footerData.services_links.map((link, index) => (
-                                    <li key={index}>
-                                        <a href={typeof link === 'object' ? (link.href || '#') : '#'} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
-                                            {typeof link === 'object' ? (link.label || link) : link}
-                                        </a>
-                                    </li>
-                                ))
-                            ) : (
-                                <>
+                    {/* Dynamic Footer Sections */}
+                    {footerData?.footer_sections && Array.isArray(footerData.footer_sections) && footerData.footer_sections.length > 0 ? (
+                        footerData.footer_sections.map((section, sectionIndex) => (
+                            <div key={sectionIndex}>
+                                <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">{section.title || 'Section'}</h3>
+                                <ul className={`space-y-2 sm:space-y-3 text-xs sm:text-sm ${sectionIndex === footerData.footer_sections.length - 1 ? 'mb-5 sm:mb-6' : ''}`}>
+                                    {section.links && Array.isArray(section.links) && section.links.length > 0 ? (
+                                        section.links.map((link, linkIndex) => {
+                                            const href = typeof link === 'object' ? (link.href || link.url || '#') : '#';
+                                            const label = typeof link === 'object' ? (link.label || link.name || '') : link;
+                                            const isInternalLink = href && (href.startsWith('/') && !href.startsWith('//') && !href.startsWith('/#'));
+                                            const isHashLink = href && (href.startsWith('/#') || href.startsWith('#'));
+                                            
+                                            if (isHashLink) {
+                                                const hash = href.startsWith('/#') ? href.substring(1) : href;
+                                                return (
+                                                    <li key={linkIndex}>
+                                                        <a href={href} onClick={(e) => handleHashClick(e, hash)} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
+                                                            {label}
+                                                        </a>
+                                                    </li>
+                                                );
+                                            } else if (isInternalLink) {
+                                                return (
+                                                    <li key={linkIndex}>
+                                                        <Link to={href} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
+                                                            {label}
+                                                        </Link>
+                                                    </li>
+                                                );
+                                            } else {
+                                                return (
+                                                    <li key={linkIndex}>
+                                                        <a href={href} target={href.startsWith('http') ? '_blank' : '_self'} rel={href.startsWith('http') ? 'noopener noreferrer' : ''} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
+                                                            {label}
+                                                        </a>
+                                                    </li>
+                                                );
+                                            }
+                                        })
+                                    ) : null}
+                                </ul>
+                            </div>
+                        ))
+                    ) : (
+                        <>
+                            {/* Default fallback sections if no dynamic sections */}
+                            <div>
+                                <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">Quick Links</h3>
+                                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                                    <li><a href="/#home" onClick={(e) => handleHashClick(e, '#home')} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Home</a></li>
+                                    <li><a href="/#about" onClick={(e) => handleHashClick(e, '#about')} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">About Doctor</a></li>
+                                    <li><a href="/#services" onClick={(e) => handleHashClick(e, '#services')} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Services</a></li>
+                                    <li><a href="/#blog" onClick={(e) => handleHashClick(e, '#blog')} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Blog</a></li>
+                                    <li><a href="/#contact" onClick={(e) => handleHashClick(e, '#contact')} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Contact</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">Our Services</h3>
+                                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Anaesthesia</a></li>
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Intensive Care</a></li>
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Pain Management</a></li>
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Diabetology</a></li>
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Consultation</a></li>
-                                </>
-                            )}
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">{footerData?.resources_title || 'Patient Resources'}</h3>
-                        <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm mb-5 sm:mb-6">
-                            {footerData?.resources_links && Array.isArray(footerData.resources_links) && footerData.resources_links.length > 0 ? (
-                                footerData.resources_links.map((link, index) => (
-                                    typeof link === 'object' && link.href && link.href.startsWith('/') ? (
-                                        <li key={index}>
-                                            <Link to={link.href} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
-                                                {link.label || link}
-                                            </Link>
-                                        </li>
-                                    ) : (
-                                        <li key={index}>
-                                            <a href={typeof link === 'object' ? (link.href || '#') : '#'} className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">
-                                                {typeof link === 'object' ? (link.label || link) : link}
-                                            </a>
-                                        </li>
-                                    )
-                                ))
-                            ) : (
-                                <>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">Patient Resources</h3>
+                                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm mb-5 sm:mb-6">
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Educational Videos</a></li>
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">FAQ</a></li>
                                     <li><a href="#" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Research Papers</a></li>
                                     <li><Link to="/appointment" className="text-gray-200 hover:text-accent transition hover:translate-x-1 inline-block">Book Appointment</Link></li>
-                                </>
-                            )}
-                        </ul>
+                                </ul>
+                            </div>
+                        </>
+                    )}
 
+                    {/* Social Media Section - Always in last column */}
+                    <div>
+                        <h3 className="font-bold mb-4 sm:mb-5 md:mb-6 text-base sm:text-lg text-accent">{footerData?.social_media_title || 'Follow Us'}</h3>
+                        <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm mb-5 sm:mb-6">
+                            {/* Empty space for links if needed */}
+                        </ul>
                         <div className="mt-6 sm:mt-8">
-                            <h4 className="font-bold mb-3 sm:mb-4 text-xs sm:text-sm">{footerData?.social_media_title || 'Follow Us'}</h4>
                             <div className="flex gap-2 sm:gap-3">
                                 {footerData?.facebook_url && (
                                     <a href={footerData.facebook_url} target="_blank" rel="noopener noreferrer" className="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-accent backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center transition group">

@@ -171,7 +171,7 @@ class NavbarSettingsSerializer(serializers.ModelSerializer):
         fields = [
             'logo_icon', 'doctor_name', 'doctor_title',
             'phone_number', 'email', 'working_hours',
-            'menu_items', 'appointment_button_text', 'appointment_button_icon'
+            'appointment_button_text', 'appointment_button_icon'
         ]
 
 
@@ -181,9 +181,7 @@ class FooterSettingsSerializer(serializers.ModelSerializer):
         fields = [
             'logo_icon', 'doctor_name', 'description',
             'address', 'phone_number', 'email', 'working_hours',
-            'quick_links_title', 'quick_links',
-            'services_title', 'services_links',
-            'resources_title', 'resources_links',
+            'footer_sections',
             'social_media_title', 'facebook_url', 'twitter_url', 'linkedin_url', 'instagram_url', 'youtube_url',
             'copyright_text'
         ]
