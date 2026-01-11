@@ -14,10 +14,13 @@ const Home = () => {
         testimonials: [],
         research: [],
         contact: {},
+        footer: {},
+        video_section_settings: {},
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [researchFilter, setResearchFilter] = useState('all'); // 'all', 'publications', 'papers'
+    const [videoSlideIndex, setVideoSlideIndex] = useState(0); // For video slider
 
     useEffect(() => {
         const fetchPortfolioData = async () => {
@@ -69,7 +72,68 @@ const Home = () => {
         );
     }
 
-    const { hero, services, featured_services, services_section, about, videos, testimonials, research, contact } = portfolioData;
+    const { hero, services, featured_services, services_section, about, videos, testimonials, research, contact, footer, video_section_settings } = portfolioData;
+    
+    // Get dynamic link for "Show All Videos" from video_section_settings
+    const getShowAllVideosLink = () => {
+        if (video_section_settings && video_section_settings.show_all_videos_link) {
+            return video_section_settings.show_all_videos_link;
+        }
+        // Fallback: try footer resources_links
+        if (footer && footer.resources_links && Array.isArray(footer.resources_links)) {
+            const educationalVideosLink = footer.resources_links.find(
+                link => link.label && link.label.toLowerCase().includes('educational videos')
+            );
+            if (educationalVideosLink && educationalVideosLink.href) {
+                return educationalVideosLink.href;
+            }
+        }
+        // Final fallback to default link
+        return '/#blog';
+    };
+    
+    const showAllVideosLink = getShowAllVideosLink();
+    const showAllVideosText = video_section_settings?.show_all_videos_text || 'Show All Videos';
+    
+    // Video slider functions - responsive
+    const [videosPerSlide, setVideosPerSlide] = useState(3);
+    
+    useEffect(() => {
+        const updateVideosPerSlide = () => {
+            if (window.innerWidth < 640) {
+                setVideosPerSlide(1); // Mobile: 1 video
+            } else if (window.innerWidth < 768) {
+                setVideosPerSlide(2); // Tablet: 2 videos
+            } else {
+                setVideosPerSlide(3); // Desktop: 3 videos
+            }
+        };
+        
+        updateVideosPerSlide();
+        window.addEventListener('resize', updateVideosPerSlide);
+        return () => window.removeEventListener('resize', updateVideosPerSlide);
+    }, []);
+    
+    // Reset slide index when videosPerSlide changes or videos change
+    useEffect(() => {
+        setVideoSlideIndex(0);
+    }, [videosPerSlide, videos]);
+    
+    const totalSlides = videos && videos.length > 0 ? Math.ceil(videos.length / videosPerSlide) : 0;
+    
+    const handlePrevVideo = () => {
+        setVideoSlideIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
+    };
+    
+    const handleNextVideo = () => {
+        setVideoSlideIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
+    };
+    
+    const getVisibleVideos = () => {
+        if (!videos || videos.length === 0) return [];
+        const start = videoSlideIndex * videosPerSlide;
+        return videos.slice(start, start + videosPerSlide);
+    };
     
     // Filter research items based on selected filter
     const filteredResearch = research && research.length > 0 ? research.filter((item) => {
@@ -456,30 +520,51 @@ const Home = () => {
                     <div className="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-secondary/5 rounded-full blur-3xl"></div>
                     <div className="container mx-auto px-4 sm:px-6 relative z-10">
                         <div className="text-center mb-4 sm:mb-6">
-                            <div className="inline-block mb-3 sm:mb-4">
-                                <span
-                                    className="text-secondary font-bold text-xs sm:text-sm uppercase tracking-wider bg-secondary/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">Educational
-                                    Videos</span>
+                            {video_section_settings?.badge_text ? (
+                                <div className="inline-block mb-3 sm:mb-4">
+                                    <span
+                                        className="text-secondary font-bold text-xs sm:text-sm uppercase tracking-wider bg-secondary/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
+                                        {video_section_settings.badge_text}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="inline-block mb-3 sm:mb-4">
+                                    <span
+                                        className="text-secondary font-bold text-xs sm:text-sm uppercase tracking-wider bg-secondary/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">Educational
+                                        Videos</span>
+                                </div>
+                            )}
+                            {video_section_settings?.title ? (
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-5 leading-tight">
+                                    {video_section_settings.title.split(' ').slice(0, -1).join(' ')} <span className="text-primary">{video_section_settings.title.split(' ').slice(-1)[0]}</span>
+                                </h2>
+                            ) : (
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-5 leading-tight">
+                                    Watch: My Promise to <span className="text-primary">You</span>
+                                </h2>
+                            )}
+                        </div>
+                        {videos && videos.length > videosPerSlide && (
+                            <div className="flex justify-center space-x-2 sm:space-x-3 mb-10 sm:mb-12 md:mb-16">
+                                <button
+                                    onClick={handlePrevVideo}
+                                    disabled={totalSlides <= 1}
+                                    className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-primary/20 hover:border-primary rounded-full hover:bg-primary hover:text-white flex items-center justify-center transition group disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i className="fas fa-chevron-left text-sm sm:text-base text-primary group-hover:text-white"></i>
+                                </button>
+                                <button
+                                    onClick={handleNextVideo}
+                                    disabled={totalSlides <= 1}
+                                    className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-primary/20 hover:border-primary rounded-full hover:bg-primary hover:text-white flex items-center justify-center transition group disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i className="fas fa-chevron-right text-sm sm:text-base text-primary group-hover:text-white"></i>
+                                </button>
                             </div>
-                            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-5 leading-tight">
-                                Watch: My Promise to <span
-                                    className="text-primary">You</span>
-                            </h2>
-                        </div>
-                        <div className="flex justify-center space-x-2 sm:space-x-3 mb-10 sm:mb-12 md:mb-16">
-                            <button
-                                className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-primary/20 hover:border-primary rounded-full hover:bg-primary hover:text-white flex items-center justify-center transition group">
-                                <i className="fas fa-chevron-left text-sm sm:text-base text-primary group-hover:text-white"></i>
-                            </button>
-                            <button
-                                className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-primary/20 hover:border-primary rounded-full hover:bg-primary hover:text-white flex items-center justify-center transition group">
-                                <i className="fas fa-chevron-right text-sm sm:text-base text-primary group-hover:text-white"></i>
-                            </button>
-                        </div>
+                        )}
 
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 md:gap-8">
-                            {videos && videos.length > 0 ? (
-                                videos.slice(0, 3).map((video) => (
+                        <div className="relative overflow-hidden">
+                            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 md:gap-8 transition-all duration-500 ease-in-out">
+                                {videos && videos.length > 0 ? (
+                                    getVisibleVideos().map((video) => (
                                     <div key={video.id} className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group">
                                         <div className="relative overflow-hidden">
                                             <img 
@@ -516,18 +601,40 @@ const Home = () => {
                                             </div>
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="col-span-full text-center text-gray-500 py-8">No videos available at the moment.</div>
-                            )}
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center text-gray-500 py-8 w-full">No videos available at the moment.</div>
+                                )}
+                            </div>
                         </div>
+                        
+                        {/* Slider indicators */}
+                        {videos && videos.length > videosPerSlide && totalSlides > 1 && (
+                            <div className="flex justify-center gap-2 mt-6">
+                                {Array.from({ length: totalSlides }).map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setVideoSlideIndex(index)}
+                                        className={`w-2 h-2 rounded-full transition-all ${
+                                            index === videoSlideIndex 
+                                                ? 'bg-primary w-8' 
+                                                : 'bg-primary/30 hover:bg-primary/50'
+                                        }`}
+                                        aria-label={`Go to slide ${index + 1}`}
+                                    />
+                                ))}
+                            </div>
+                        )}
 
                         <div className="text-center mt-8 sm:mt-10 md:mt-12">
-                            <button
+                            <a
+                                href={showAllVideosLink}
+                                target={showAllVideosLink.startsWith('http') ? '_blank' : '_self'}
+                                rel={showAllVideosLink.startsWith('http') ? 'noopener noreferrer' : ''}
                                 className="bg-gradient-to-r from-secondary to-accent hover:from-accent hover:to-secondary shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 text-white px-8 sm:px-10 md:px-12 py-3 sm:py-3.5 md:py-4 rounded-full text-xs sm:text-sm font-bold inline-flex items-center group">
-                                <span>Show All Videos</span>
+                                <span>{showAllVideosText}</span>
                                 <i className="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </section>

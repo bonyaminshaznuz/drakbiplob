@@ -91,6 +91,34 @@ class Video(models.Model):
         return self.title
 
 
+class VideoSectionSettings(models.Model):
+    """Settings for the Educational Videos section"""
+    badge_text = models.CharField(max_length=100, default="Educational Videos")
+    title = models.CharField(max_length=300, default="Watch: My Promise to You")
+    show_all_videos_link = models.URLField(
+        blank=True, 
+        null=True, 
+        help_text="Link for 'Show All Videos' button (e.g., YouTube channel, external page, or /#blog for same page)"
+    )
+    show_all_videos_text = models.CharField(max_length=100, default="Show All Videos")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Video Section Settings"
+        verbose_name_plural = "Video Section Settings"
+
+    def __str__(self):
+        return "Video Section Settings"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists
+        if not self.pk and VideoSectionSettings.objects.exists():
+            return
+        super().save(*args, **kwargs)
+
+
 class Testimonial(models.Model):
     name = models.CharField(max_length=200)
     role = models.CharField(max_length=200, help_text="e.g., Surgical Patient, ICU Patient")

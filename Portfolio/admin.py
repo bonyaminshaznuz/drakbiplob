@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, ServicesSectionItem, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, ServicesSectionItem, NavbarSettings, FooterSettings, SiteSettings, VideoSectionSettings
 
 
 @admin.register(HeroSection)
@@ -121,6 +121,32 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         # Only allow one instance
         return not SiteSettings.objects.exists()
+    
+    def has_delete_permission(self, request, obj=None):
+        return False  # Don't allow deletion
+
+
+@admin.register(VideoSectionSettings)
+class VideoSectionSettingsAdmin(admin.ModelAdmin):
+    list_display = ['title', 'badge_text', 'show_all_videos_text', 'is_active', 'updated_at']
+    list_filter = ['is_active', 'updated_at']
+    search_fields = ['title', 'badge_text', 'show_all_videos_text']
+    fieldsets = (
+        ('Section Information', {
+            'fields': ('badge_text', 'title')
+        }),
+        ('Show All Videos Button', {
+            'fields': ('show_all_videos_text', 'show_all_videos_link'),
+            'description': 'Configure the "Show All Videos" button. You can use external links like YouTube channel URL (e.g., https://www.youtube.com/@channelname) or internal links like /#blog'
+        }),
+        ('Display Options', {
+            'fields': ('is_active',)
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Only allow one instance
+        return not VideoSectionSettings.objects.exists()
     
     def has_delete_permission(self, request, obj=None):
         return False  # Don't allow deletion

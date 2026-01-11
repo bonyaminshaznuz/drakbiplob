@@ -4,11 +4,11 @@ from rest_framework.views import APIView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, ServicesSectionItem, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, ServicesSectionItem, NavbarSettings, FooterSettings, SiteSettings, VideoSectionSettings
 from .serializers import (
     HeroSectionSerializer, ServiceSerializer, AboutSectionSerializer,
     VideoSerializer, TestimonialSerializer, ResearchSerializer,
-    ContactSectionSerializer, ServicesSectionSerializer, ServicesSectionItemSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer, SiteSettingsSerializer
+    ContactSectionSerializer, ServicesSectionSerializer, ServicesSectionItemSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer, SiteSettingsSerializer, VideoSectionSettingsSerializer
 )
 
 
@@ -117,6 +117,7 @@ class PortfolioDataView(APIView):
         navbar = NavbarSettings.objects.filter(is_active=True).first()
         footer = FooterSettings.objects.filter(is_active=True).first()
         site_settings = SiteSettings.objects.filter(is_active=True).first()
+        video_section_settings = VideoSectionSettings.objects.filter(is_active=True).first()
 
         context = {'request': request}
         
@@ -135,6 +136,7 @@ class PortfolioDataView(APIView):
             'navbar': NavbarSettingsSerializer(navbar).data if navbar else {},
             'footer': FooterSettingsSerializer(footer).data if footer else {},
             'site_settings': SiteSettingsSerializer(site_settings, context=context).data if site_settings else {},
+            'video_section_settings': VideoSectionSettingsSerializer(video_section_settings).data if video_section_settings else {},
         }
 
         return Response(data, status=status.HTTP_200_OK)
