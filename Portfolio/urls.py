@@ -67,6 +67,12 @@ urlpatterns = [
     path('admin-panel/portfolio/services-section/edit/<int:pk>/', views.admin_services_section_edit, name='admin-services-section-edit'),
     path('admin-panel/portfolio/services-section/delete/<int:pk>/', views.admin_services_section_delete, name='admin-services-section-delete'),
     
+    # Services Section Items CRUD
+    path('admin-panel/portfolio/services-section/<int:section_pk>/items/', views.admin_services_section_item_list, name='admin-services-section-item-list'),
+    path('admin-panel/portfolio/services-section/<int:section_pk>/items/create/', views.admin_services_section_item_create, name='admin-services-section-item-create'),
+    path('admin-panel/portfolio/services-section/<int:section_pk>/items/edit/<int:item_pk>/', views.admin_services_section_item_edit, name='admin-services-section-item-edit'),
+    path('admin-panel/portfolio/services-section/<int:section_pk>/items/delete/<int:item_pk>/', views.admin_services_section_item_delete, name='admin-services-section-item-delete'),
+    
     # Navbar & Footer Settings
     path('admin-panel/portfolio/navbar/', views.admin_navbar_edit, name='admin-navbar-edit'),
     path('admin-panel/portfolio/footer/', views.admin_footer_edit, name='admin-footer-edit'),

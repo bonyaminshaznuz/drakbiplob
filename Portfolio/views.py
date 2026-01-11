@@ -4,11 +4,11 @@ from rest_framework.views import APIView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, ServicesSectionItem, NavbarSettings, FooterSettings, SiteSettings
 from .serializers import (
     HeroSectionSerializer, ServiceSerializer, AboutSectionSerializer,
     VideoSerializer, TestimonialSerializer, ResearchSerializer,
-    ContactSectionSerializer, ServicesSectionSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer, SiteSettingsSerializer
+    ContactSectionSerializer, ServicesSectionSerializer, ServicesSectionItemSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer, SiteSettingsSerializer
 )
 
 
@@ -676,6 +676,74 @@ def admin_services_section_delete(request, pk):
         messages.success(request, 'Services section deleted successfully!')
         return redirect('admin-services-section-list')
     return render(request, 'portfolio/services_section_confirm_delete.html', {'services_section': services_section})
+
+
+# Services Section Items CRUD
+@staff_member_required
+def admin_services_section_item_list(request, section_pk):
+    services_section = get_object_or_404(ServicesSection, pk=section_pk)
+    items = ServicesSectionItem.objects.filter(services_section=services_section).order_by('order')
+    return render(request, 'portfolio/services_section_item_list.html', {
+        'services_section': services_section,
+        'items': items
+    })
+
+
+@staff_member_required
+def admin_services_section_item_create(request, section_pk):
+    services_section = get_object_or_404(ServicesSection, pk=section_pk)
+    if request.method == 'POST':
+        item = ServicesSectionItem()
+        item.services_section = services_section
+        item.icon = request.POST.get('icon', '')
+        item.title = request.POST.get('title', '')
+        item.description = request.POST.get('description', '')
+        item.link = request.POST.get('link', '') or None
+        item.order = int(request.POST.get('order', 0))
+        item.is_active = request.POST.get('is_active') == 'on'
+        item.save()
+        messages.success(request, 'Services section item created successfully!')
+        return redirect('admin-services-section-item-list', section_pk=section_pk)
+    return render(request, 'portfolio/services_section_item_form.html', {
+        'services_section': services_section,
+        'item': None,
+        'action': 'Create'
+    })
+
+
+@staff_member_required
+def admin_services_section_item_edit(request, section_pk, item_pk):
+    services_section = get_object_or_404(ServicesSection, pk=section_pk)
+    item = get_object_or_404(ServicesSectionItem, pk=item_pk, services_section=services_section)
+    if request.method == 'POST':
+        item.icon = request.POST.get('icon', '')
+        item.title = request.POST.get('title', '')
+        item.description = request.POST.get('description', '')
+        item.link = request.POST.get('link', '') or None
+        item.order = int(request.POST.get('order', 0))
+        item.is_active = request.POST.get('is_active') == 'on'
+        item.save()
+        messages.success(request, 'Services section item updated successfully!')
+        return redirect('admin-services-section-item-list', section_pk=section_pk)
+    return render(request, 'portfolio/services_section_item_form.html', {
+        'services_section': services_section,
+        'item': item,
+        'action': 'Edit'
+    })
+
+
+@staff_member_required
+def admin_services_section_item_delete(request, section_pk, item_pk):
+    services_section = get_object_or_404(ServicesSection, pk=section_pk)
+    item = get_object_or_404(ServicesSectionItem, pk=item_pk, services_section=services_section)
+    if request.method == 'POST':
+        item.delete()
+        messages.success(request, 'Services section item deleted successfully!')
+        return redirect('admin-services-section-item-list', section_pk=section_pk)
+    return render(request, 'portfolio/services_section_item_confirm_delete.html', {
+        'services_section': services_section,
+        'item': item
+    })
 
 
 # Navbar Settings CRUD

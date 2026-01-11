@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, ServicesSectionItem, NavbarSettings, FooterSettings, SiteSettings
 
 
 @admin.register(HeroSection)
@@ -66,8 +66,36 @@ class ContactSectionAdmin(admin.ModelAdmin):
 
 @admin.register(ServicesSection)
 class ServicesSectionAdmin(admin.ModelAdmin):
-    list_display = ['title', 'is_active', 'created_at']
+    list_display = ['title', 'badge_text', 'is_active', 'created_at']
     list_filter = ['is_active', 'created_at']
+    search_fields = ['title', 'badge_text', 'description']
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('badge_text', 'title', 'description')
+        }),
+        ('Display Options', {
+            'fields': ('is_active',)
+        }),
+    )
+
+
+@admin.register(ServicesSectionItem)
+class ServicesSectionItemAdmin(admin.ModelAdmin):
+    list_display = ['title', 'services_section', 'icon', 'order', 'is_active', 'created_at']
+    list_filter = ['services_section', 'is_active', 'created_at']
+    search_fields = ['title', 'description']
+    ordering = ['services_section', 'order']
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('services_section', 'title', 'description', 'icon', 'link', 'order')
+        }),
+        ('Display Options', {
+            'fields': ('is_active',)
+        }),
+    )
+    help_texts = {
+        'icon': 'Enter Font Awesome icon class (e.g., fas fa-syringe, fas fa-heartbeat, fas fa-hand-holding-medical). Browse icons at: https://fontawesome.com/icons',
+    }
 
 
 @admin.register(NavbarSettings)

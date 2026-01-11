@@ -34,6 +34,11 @@ const Home = () => {
                 // #region agent log
                 fetch('http://127.0.0.1:7243/ingest/505ac12e-e307-46cb-96d7-8736582c9d0f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:30',message:'Portfolio data received',data:{hero_image:data.hero?.image,about_image:data.about?.image,contact_image_url:data.contact?.image_url,has_hero:!!data.hero,has_about:!!data.about},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
                 // #endregion
+                console.log('Portfolio Data:', {
+                    services_count: data.services?.length || 0,
+                    services_section: data.services_section,
+                    services: data.services?.slice(0, 2) // First 2 services for debugging
+                });
                 setPortfolioData(data);
             } catch (err) {
                 console.error('Error fetching portfolio data:', err);
@@ -562,8 +567,8 @@ const Home = () => {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 md:gap-7 max-w-6xl mx-auto">
-                            {services && services.length > 0 ? (
-                                services.slice(0, 4).map((service, index) => {
+                            {services_section?.items && services_section.items.length > 0 ? (
+                                services_section.items.slice(0, 4).map((item, index) => {
                                     const borderColors = [
                                         'border-primary/10 hover:border-primary/30',
                                         'border-secondary/10 hover:border-secondary/30',
@@ -585,22 +590,22 @@ const Home = () => {
                                     
                                     return (
                                         <div
-                                            key={service.id || index}
+                                            key={item.id || index}
                                             className={`bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 ${borderColors[index % borderColors.length]} shadow-lg hover:shadow-2xl transition-all duration-300 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 hover:-translate-y-1`}>
                                             <div
                                                 className={`w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 ${iconBgClasses[index % iconBgClasses.length]} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
-                                                <i className={`${service.icon || 'fas fa-syringe'} text-white text-2xl sm:text-3xl`}></i>
+                                                <i className={`${item.icon || 'fas fa-syringe'} text-white text-2xl sm:text-3xl`}></i>
                                             </div>
                                             <div className="flex-1 text-center sm:text-left">
                                                 <h3
                                                     className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">
-                                                    {service.title}
+                                                    {item.title}
                                                 </h3>
                                                 <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
-                                                    {service.description}
+                                                    {item.description}
                                                 </p>
-                                                {(service.link || service.link !== '') ? (
-                                                    <a href={service.link || '#'}
+                                                {(item.link && item.link !== '') ? (
+                                                    <a href={item.link || '#'}
                                                         className={`${linkColors[index % linkColors.length]} text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all`}>
                                                         Learn More <i
                                                             className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
@@ -617,7 +622,7 @@ const Home = () => {
                                     );
                                 })
                             ) : (
-                                // Fallback hardcoded services if no services from API
+                                // Fallback hardcoded services if no items from API
                                 <>
                                     <div
                                         className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-primary/10 hover:border-primary/30 shadow-lg hover:shadow-2xl transition-all duration-300 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 hover:-translate-y-1">

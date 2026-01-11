@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.conf import settings
 import os
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, ServicesSectionItem, NavbarSettings, FooterSettings, SiteSettings
 
 
 def get_image_url(image_field, request=None):
@@ -145,10 +145,24 @@ class ContactSectionSerializer(serializers.ModelSerializer):
         return None
 
 
+class ServicesSectionItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServicesSectionItem
+        fields = ['id', 'icon', 'title', 'description', 'link', 'order']
+
+
 class ServicesSectionSerializer(serializers.ModelSerializer):
+    items = serializers.SerializerMethodField()
+    
     class Meta:
         model = ServicesSection
-        fields = ['badge_text', 'title', 'description']
+        fields = ['badge_text', 'title', 'description', 'items']
+    
+    def get_items(self, obj):
+        if obj:
+            active_items = obj.items.filter(is_active=True).order_by('order')
+            return ServicesSectionItemSerializer(active_items, many=True).data
+        return []
 
 
 class NavbarSettingsSerializer(serializers.ModelSerializer):

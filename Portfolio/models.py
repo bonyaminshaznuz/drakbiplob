@@ -161,6 +161,26 @@ class ServicesSection(models.Model):
         return "Services Section"
 
 
+class ServicesSectionItem(models.Model):
+    services_section = models.ForeignKey(ServicesSection, on_delete=models.CASCADE, related_name='items')
+    icon = models.CharField(max_length=50, help_text="Font Awesome icon class (e.g., 'fas fa-syringe')")
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    link = models.URLField(blank=True, null=True)
+    order = models.IntegerField(default=0, help_text="Display order")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Services Section Item"
+        verbose_name_plural = "Services Section Items"
+        ordering = ['order', 'title']
+
+    def __str__(self):
+        return f"{self.services_section.title} - {self.title}"
+
+
 class NavbarSettings(models.Model):
     # Logo/Brand Info
     logo_icon = models.CharField(max_length=50, default="fas fa-stethoscope", help_text="Font Awesome icon class")
