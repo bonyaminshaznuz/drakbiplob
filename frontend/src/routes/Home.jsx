@@ -21,6 +21,7 @@ const Home = () => {
     const [error, setError] = useState(null);
     const [researchFilter, setResearchFilter] = useState('all'); // 'all', 'publications', 'papers'
     const [videoSlideIndex, setVideoSlideIndex] = useState(0); // For video slider
+    const [videosPerSlide, setVideosPerSlide] = useState(3); // Video slider - responsive
 
     useEffect(() => {
         const fetchPortfolioData = async () => {
@@ -47,6 +48,30 @@ const Home = () => {
 
         fetchPortfolioData();
     }, []);
+
+    useEffect(() => {
+        const updateVideosPerSlide = () => {
+            if (window.innerWidth < 640) {
+                setVideosPerSlide(1); // Mobile: 1 video
+            } else if (window.innerWidth < 768) {
+                setVideosPerSlide(2); // Tablet: 2 videos
+            } else {
+                setVideosPerSlide(3); // Desktop: 3 videos
+            }
+        };
+        
+        updateVideosPerSlide();
+        window.addEventListener('resize', updateVideosPerSlide);
+        return () => window.removeEventListener('resize', updateVideosPerSlide);
+    }, []);
+
+    // Reset slide index when videosPerSlide changes or videos change
+    useEffect(() => {
+        const { videos } = portfolioData;
+        if (videos) {
+            setVideoSlideIndex(0);
+        }
+    }, [videosPerSlide, portfolioData.videos]);
 
     if (loading) {
         return (
@@ -85,30 +110,6 @@ const Home = () => {
     
     const showAllVideosLink = getShowAllVideosLink();
     const showAllVideosText = video_section_settings?.show_all_videos_text || 'Show All Videos';
-    
-    // Video slider functions - responsive
-    const [videosPerSlide, setVideosPerSlide] = useState(3);
-    
-    useEffect(() => {
-        const updateVideosPerSlide = () => {
-            if (window.innerWidth < 640) {
-                setVideosPerSlide(1); // Mobile: 1 video
-            } else if (window.innerWidth < 768) {
-                setVideosPerSlide(2); // Tablet: 2 videos
-            } else {
-                setVideosPerSlide(3); // Desktop: 3 videos
-            }
-        };
-        
-        updateVideosPerSlide();
-        window.addEventListener('resize', updateVideosPerSlide);
-        return () => window.removeEventListener('resize', updateVideosPerSlide);
-    }, []);
-    
-    // Reset slide index when videosPerSlide changes or videos change
-    useEffect(() => {
-        setVideoSlideIndex(0);
-    }, [videosPerSlide, videos]);
     
     const totalSlides = videos && videos.length > 0 ? Math.ceil(videos.length / videosPerSlide) : 0;
     
