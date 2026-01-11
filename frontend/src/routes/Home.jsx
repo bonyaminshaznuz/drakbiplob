@@ -527,7 +527,7 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* Specialized Cancer Treatment */}
+                {/* Specialized Care Section */}
                 <section
                     className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-cream via-white to-softcream relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-primary/5 rounded-full blur-3xl"></div>

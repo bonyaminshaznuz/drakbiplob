@@ -88,6 +88,17 @@
             <p class="text-sm text-gray-500">Contact Sections</p>
             <a href="{% url 'admin-contact-list' %}" class="text-red-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
         </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <div class="h-12 w-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-star-of-life text-teal-600 text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{{ services_section_count }}</h3>
+            <p class="text-sm text-gray-500">Specialized Care</p>
+            <a href="{% url 'admin-services-section-list' %}" class="text-teal-600 text-sm font-semibold mt-2 inline-block hover:underline">Manage →</a>
+        </div>
     </div>
 
     <!-- Quick Actions -->

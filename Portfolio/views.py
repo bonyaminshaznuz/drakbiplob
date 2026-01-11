@@ -242,6 +242,7 @@ def admin_portfolio_dashboard(request):
     context = {
         'hero_count': HeroSection.objects.count(),
         'service_count': Service.objects.count(),
+        'services_section_count': ServicesSection.objects.count(),
         'video_count': Video.objects.count(),
         'testimonial_count': Testimonial.objects.count(),
         'research_count': Research.objects.count(),
