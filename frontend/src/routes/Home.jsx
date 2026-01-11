@@ -547,93 +547,148 @@ const Home = () => {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 md:gap-7 max-w-6xl mx-auto">
-                            {/* Card 1 */}
-                            <div
-                                className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-primary/10 hover:border-primary/30 shadow-lg hover:shadow-2xl transition-all duration-300 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 hover:-translate-y-1">
-                                <div
-                                    className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-primary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                                    <i className="fas fa-syringe text-white text-2xl sm:text-3xl"></i>
-                                </div>
-                                <div className="flex-1 text-center sm:text-left">
-                                    <h3
-                                        className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">
-                                        Surgical Anaesthesia</h3>
-                                    <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
-                                        Safe anaesthesia management for all surgical procedures with patient safety priority.
-                                    </p>
-                                    <Link to="#"
-                                        className="text-primary text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-secondary">
-                                        Learn More <i
-                                            className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-                                    </Link>
-                                </div>
-                            </div>
+                            {services && services.length > 0 ? (
+                                services.slice(0, 4).map((service, index) => {
+                                    const borderColors = [
+                                        'border-primary/10 hover:border-primary/30',
+                                        'border-secondary/10 hover:border-secondary/30',
+                                        'border-purple-100 hover:border-purple-300',
+                                        'border-indigo-100 hover:border-indigo-300'
+                                    ];
+                                    const iconBgClasses = [
+                                        'bg-primary',
+                                        'bg-gradient-to-br from-secondary to-accent',
+                                        'bg-gradient-to-br from-purple-600 to-pink-500',
+                                        'bg-gradient-to-br from-indigo-600 to-blue-500'
+                                    ];
+                                    const linkColors = [
+                                        'text-primary group-hover:text-secondary',
+                                        'text-secondary group-hover:text-accent',
+                                        'text-purple-600 group-hover:text-pink-500',
+                                        'text-indigo-600 group-hover:text-blue-500'
+                                    ];
+                                    
+                                    return (
+                                        <div
+                                            key={service.id || index}
+                                            className={`bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 ${borderColors[index % borderColors.length]} shadow-lg hover:shadow-2xl transition-all duration-300 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 hover:-translate-y-1`}>
+                                            <div
+                                                className={`w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 ${iconBgClasses[index % iconBgClasses.length]} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+                                                <i className={`${service.icon || 'fas fa-syringe'} text-white text-2xl sm:text-3xl`}></i>
+                                            </div>
+                                            <div className="flex-1 text-center sm:text-left">
+                                                <h3
+                                                    className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">
+                                                    {service.title}
+                                                </h3>
+                                                <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
+                                                    {service.description}
+                                                </p>
+                                                {(service.link || service.link !== '') ? (
+                                                    <a href={service.link || '#'}
+                                                        className={`${linkColors[index % linkColors.length]} text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all`}>
+                                                        Learn More <i
+                                                            className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                                                    </a>
+                                                ) : (
+                                                    <Link to="#"
+                                                        className={`${linkColors[index % linkColors.length]} text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all`}>
+                                                        Learn More <i
+                                                            className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                // Fallback hardcoded services if no services from API
+                                <>
+                                    <div
+                                        className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-primary/10 hover:border-primary/30 shadow-lg hover:shadow-2xl transition-all duration-300 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 hover:-translate-y-1">
+                                        <div
+                                            className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-primary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                                            <i className="fas fa-syringe text-white text-2xl sm:text-3xl"></i>
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <h3
+                                                className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">
+                                                Surgical Anaesthesia</h3>
+                                            <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
+                                                Safe anaesthesia management for all surgical procedures with patient safety priority.
+                                            </p>
+                                            <Link to="#"
+                                                className="text-primary text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-secondary">
+                                                Learn More <i
+                                                    className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                                            </Link>
+                                        </div>
+                                    </div>
 
-                            {/* Card 2 */}
-                            <div
-                                className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-secondary/10 hover:border-secondary/30 shadow-lg hover:shadow-2xl transition-all duration-300 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 hover:-translate-y-1">
-                                <div
-                                    className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-secondary to-accent rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                                    <i className="fas fa-heartbeat text-white text-2xl sm:text-3xl"></i>
-                                </div>
-                                <div className="flex-1 text-center sm:text-left">
-                                    <h3
-                                        className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">
-                                        Critical Care</h3>
-                                    <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
-                                        24/7 intensive care unit management for critically ill patients with advanced monitoring.
-                                    </p>
-                                    <Link to="#"
-                                        className="text-secondary text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-accent">
-                                        Learn More <i
-                                            className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-                                    </Link>
-                                </div>
-                            </div>
+                                    <div
+                                        className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-secondary/10 hover:border-secondary/30 shadow-lg hover:shadow-2xl transition-all duration-300 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 hover:-translate-y-1">
+                                        <div
+                                            className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-secondary to-accent rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                                            <i className="fas fa-heartbeat text-white text-2xl sm:text-3xl"></i>
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <h3
+                                                className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-secondary transition-colors">
+                                                Critical Care</h3>
+                                            <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
+                                                24/7 intensive care unit management for critically ill patients with advanced monitoring.
+                                            </p>
+                                            <Link to="#"
+                                                className="text-secondary text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-accent">
+                                                Learn More <i
+                                                    className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                                            </Link>
+                                        </div>
+                                    </div>
 
-                            {/* Card 3 */}
-                            <div
-                                className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-purple-100 hover:border-purple-300 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
-                                <div
-                                    className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-purple-600 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                                    <i className="fas fa-hand-holding-medical text-white text-2xl sm:text-3xl"></i>
-                                </div>
-                                <div className="flex-1 text-center sm:text-left">
-                                    <h3
-                                        className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-purple-600 transition-colors">
-                                        Pain Relief</h3>
-                                    <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
-                                        Advanced pain management techniques for chronic and acute pain conditions.
-                                    </p>
-                                    <Link to="#"
-                                        className="text-purple-600 text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-pink-500">
-                                        Learn More <i
-                                            className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-                                    </Link>
-                                </div>
-                            </div>
+                                    <div
+                                        className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-purple-100 hover:border-purple-300 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
+                                        <div
+                                            className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-purple-600 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                                            <i className="fas fa-hand-holding-medical text-white text-2xl sm:text-3xl"></i>
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <h3
+                                                className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-purple-600 transition-colors">
+                                                Pain Relief</h3>
+                                            <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
+                                                Advanced pain management techniques for chronic and acute pain conditions.
+                                            </p>
+                                            <Link to="#"
+                                                className="text-purple-600 text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-pink-500">
+                                                Learn More <i
+                                                    className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                                            </Link>
+                                        </div>
+                                    </div>
 
-                            {/* Card 4 */}
-                            <div
-                                className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-indigo-100 hover:border-indigo-300 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
-                                <div
-                                    className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
-                                    <i className="fas fa-heartbeat text-white text-2xl sm:text-3xl"></i>
-                                </div>
-                                <div className="flex-1 text-center sm:text-left">
-                                    <h3
-                                        className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-indigo-600 transition-colors">
-                                        Diabetes Care</h3>
-                                    <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
-                                        Comprehensive diabetes management with personalized treatment plans.
-                                    </p>
-                                    <Link to="#"
-                                        className="text-indigo-600 text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-blue-500">
-                                        Learn More <i
-                                            className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-                                    </Link>
-                                </div>
-                            </div>
+                                    <div
+                                        className="bg-gradient-to-br from-white to-cream rounded-2xl sm:rounded-3xl p-6 sm:p-7 md:p-8 border-2 border-indigo-100 hover:border-indigo-300 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
+                                        <div
+                                            className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                                            <i className="fas fa-heartbeat text-white text-2xl sm:text-3xl"></i>
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <h3
+                                                className="text-xl sm:text-2xl font-bold text-primary mb-2 sm:mb-3 group-hover:text-indigo-600 transition-colors">
+                                                Diabetes Care</h3>
+                                            <p className="text-gray-600 text-sm sm:text-[15px] leading-relaxed mb-4">
+                                                Comprehensive diabetes management with personalized treatment plans.
+                                            </p>
+                                            <Link to="#"
+                                                className="text-indigo-600 text-sm sm:text-base font-bold inline-flex items-center gap-2 group-hover:gap-3 transition-all group-hover:text-blue-500">
+                                                Learn More <i
+                                                    className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </section>
