@@ -12,18 +12,40 @@ function App() {
     const loadSiteSettings = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-        console.log('Loading site settings from:', `${apiUrl}/api/portfolio/site-settings/`);
+        const apiEndpoint = `${apiUrl}/api/portfolio/site-settings/`;
         
-        const response = await fetch(`${apiUrl}/api/portfolio/site-settings/`);
+        // Add cache busting parameter
+        const timestamp = new Date().getTime();
+        const urlWithCache = `${apiEndpoint}?t=${timestamp}`;
+        
+        console.log('Loading site settings from:', urlWithCache);
+        
+        const response = await fetch(urlWithCache, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-cache',
+        });
         
         if (response.ok) {
           const data = await response.json();
           console.log('Site settings data received:', data);
           
-          // Update site title (always update)
-          const siteTitle = (data.site_title && data.site_title.trim()) ? data.site_title.trim() : 'Dr. Abul Khayer (Biplob)';
+          // Update site title (always update, even if empty)
+          let siteTitle = 'Dr. Abul Khayer (Biplob)'; // default
+          if (data && data.site_title !== undefined && data.site_title !== null) {
+            const titleStr = data.site_title.toString().trim();
+            if (titleStr) {
+              siteTitle = titleStr;
+              console.log('Site title updated to:', siteTitle);
+            } else {
+              console.log('Site title is empty, using default');
+            }
+          } else {
+            console.log('Site title not found in response, using default');
+          }
           document.title = siteTitle;
-          console.log('Site title updated to:', siteTitle);
           
           // Update meta description
           let metaDescription = document.querySelector('meta[name="description"]');
@@ -50,7 +72,7 @@ function App() {
             ogTitle.setAttribute('property', 'og:title');
             document.head.appendChild(ogTitle);
           }
-          ogTitle.content = data.site_title && data.site_title.trim() ? data.site_title.trim() : 'Dr. Abul Khayer (Biplob)';
+          ogTitle.content = siteTitle;
           
           let ogDescription = document.querySelector('meta[property="og:description"]');
           if (!ogDescription) {
