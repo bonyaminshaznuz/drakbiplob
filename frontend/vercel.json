@@ -3,17 +3,17 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://drakbiplob.com/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://drakbiplob.com/api/:path*"
     },
     {
-      "source": "/((?!api|assets|images|.*\\.(css|js|map|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot|json)).*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "headers": [
         {
           "key": "X-Content-Type-Options",
