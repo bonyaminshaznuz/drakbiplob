@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, NavbarSettings, FooterSettings, SiteSettings
 
 
 @admin.register(HeroSection)
@@ -60,6 +60,12 @@ class ResearchAdmin(admin.ModelAdmin):
 
 @admin.register(ContactSection)
 class ContactSectionAdmin(admin.ModelAdmin):
+    list_display = ['title', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+
+
+@admin.register(ServicesSection)
+class ServicesSectionAdmin(admin.ModelAdmin):
     list_display = ['title', 'is_active', 'created_at']
     list_filter = ['is_active', 'created_at']
 

@@ -20,15 +20,10 @@ function App() {
           const data = await response.json();
           console.log('Site settings data received:', data);
           
-          // Update site title (always update, even if empty)
-          if (data.site_title && data.site_title.trim()) {
-            document.title = data.site_title.trim();
-            console.log('Site title updated to:', data.site_title);
-          } else {
-            // Use default if not set
-            document.title = 'Dr. Abul Khayer (Biplob)';
-            console.log('Using default site title');
-          }
+          // Update site title (always update)
+          const siteTitle = (data.site_title && data.site_title.trim()) ? data.site_title.trim() : 'Dr. Abul Khayer (Biplob)';
+          document.title = siteTitle;
+          console.log('Site title updated to:', siteTitle);
           
           // Update meta description
           let metaDescription = document.querySelector('meta[name="description"]');

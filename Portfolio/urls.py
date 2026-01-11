@@ -61,6 +61,12 @@ urlpatterns = [
     path('admin-panel/portfolio/contact/edit/<int:pk>/', views.admin_contact_edit, name='admin-contact-edit'),
     path('admin-panel/portfolio/contact/delete/<int:pk>/', views.admin_contact_delete, name='admin-contact-delete'),
     
+    # Services Section CRUD
+    path('admin-panel/portfolio/services-section/', views.admin_services_section_list, name='admin-services-section-list'),
+    path('admin-panel/portfolio/services-section/create/', views.admin_services_section_create, name='admin-services-section-create'),
+    path('admin-panel/portfolio/services-section/edit/<int:pk>/', views.admin_services_section_edit, name='admin-services-section-edit'),
+    path('admin-panel/portfolio/services-section/delete/<int:pk>/', views.admin_services_section_delete, name='admin-services-section-delete'),
+    
     # Navbar & Footer Settings
     path('admin-panel/portfolio/navbar/', views.admin_navbar_edit, name='admin-navbar-edit'),
     path('admin-panel/portfolio/footer/', views.admin_footer_edit, name='admin-footer-edit'),

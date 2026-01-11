@@ -8,6 +8,7 @@ const Home = () => {
         hero: {},
         services: [],
         featured_services: [],
+        services_section: {},
         about: {},
         videos: [],
         testimonials: [],
@@ -62,7 +63,7 @@ const Home = () => {
         );
     }
 
-    const { hero, services, featured_services, about, videos, testimonials, research, contact } = portfolioData;
+    const { hero, services, featured_services, services_section, about, videos, testimonials, research, contact } = portfolioData;
 
     return (
         <>
@@ -519,20 +520,30 @@ const Home = () => {
 
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <div className="text-center mb-8 sm:mb-10 md:mb-14">
-                            <div className="inline-block mb-3 sm:mb-4">
-                                <span
-                                    className="text-secondary font-bold text-xs sm:text-sm uppercase tracking-wider bg-gradient-to-r from-secondary/10 to-accent/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-secondary/20 shadow-sm">
-                                    ✦ Specialized Care
-                                </span>
-                            </div>
-                            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 sm:mb-4 leading-tight px-4">
-                                Specialized <span
-                                    className="text-primary">Medical
-                                    Services</span>
-                            </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-4">
-                                Delivering evidence-based treatment with compassion and clinical excellence.
-                            </p>
+                            {services_section?.badge_text && (
+                                <div className="inline-block mb-3 sm:mb-4">
+                                    <span
+                                        className="text-secondary font-bold text-xs sm:text-sm uppercase tracking-wider bg-gradient-to-r from-secondary/10 to-accent/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-secondary/20 shadow-sm">
+                                        {services_section.badge_text}
+                                    </span>
+                                </div>
+                            )}
+                            {services_section?.title && (
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 sm:mb-4 leading-tight px-4">
+                                    {services_section.title.includes('Specialized Medical Services') ? (
+                                        <>
+                                            Specialized <span className="text-primary">Medical Services</span>
+                                        </>
+                                    ) : (
+                                        services_section.title
+                                    )}
+                                </h2>
+                            )}
+                            {services_section?.description && (
+                                <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed px-4">
+                                    {services_section.description}
+                                </p>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 md:gap-7 max-w-6xl mx-auto">

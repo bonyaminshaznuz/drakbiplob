@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 lg:py-6 overflow-x-hidden">
+    <div class="mb-4 sm:mb-6">
+        <a href="{% url 'admin-services-section-list' %}" class="text-red-600 hover:text-red-800 font-semibold mb-4 inline-block text-sm sm:text-base">
+            <i class="fas fa-arrow-left mr-2"></i>Back to List
+        </a>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{{ action }} Services Section</h1>
+    </div>
+
+    <form method="post" class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 w-full overflow-x-hidden">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Badge Text</label>
+                <input type="text" name="badge_text" value="{{ services_section.badge_text|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm sm:text-base">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Title</label>
+                <input type="text" name="title" value="{{ services_section.title|default:'' }}" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm sm:text-base" required>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Description</label>
+            <textarea name="description" rows="4" class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm sm:text-base resize-y" required>{{ services_section.description|default:'' }}</textarea>
+        </div>
+
+        <div class="space-y-3 pt-2 sm:pt-4">
+            <div class="flex items-center">
+                <input type="checkbox" name="is_active" {% if services_section.is_active or not services_section %}checked{% endif %} class="h-4 w-4 sm:h-5 sm:w-5 text-red-600 rounded border-gray-300 focus:ring-red-500 flex-shrink-0">
+                <label class="ml-2 sm:ml-3 text-xs sm:text-sm font-semibold text-gray-700">Active</label>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+            <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>Save
+            </button>
+            <a href="{% url 'admin-services-section-list' %}" class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm sm:text-base hover:bg-gray-50 transition-colors text-center">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

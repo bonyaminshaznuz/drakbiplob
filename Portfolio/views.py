@@ -4,11 +4,11 @@ from rest_framework.views import APIView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, NavbarSettings, FooterSettings, SiteSettings
 from .serializers import (
     HeroSectionSerializer, ServiceSerializer, AboutSectionSerializer,
     VideoSerializer, TestimonialSerializer, ResearchSerializer,
-    ContactSectionSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer, SiteSettingsSerializer
+    ContactSectionSerializer, ServicesSectionSerializer, NavbarSettingsSerializer, FooterSettingsSerializer, PortfolioDataSerializer, SiteSettingsSerializer
 )
 
 
@@ -108,6 +108,7 @@ class PortfolioDataView(APIView):
     def get(self, request):
         hero = HeroSection.objects.filter(is_active=True).first()
         services = Service.objects.filter(is_active=True).order_by('order')
+        services_section = ServicesSection.objects.filter(is_active=True).first()
         about = AboutSection.objects.filter(is_active=True).first()
         videos = Video.objects.filter(is_active=True).order_by('order')
         testimonials = Testimonial.objects.filter(is_active=True).order_by('order')
@@ -125,6 +126,7 @@ class PortfolioDataView(APIView):
             'featured_services': ServiceSerializer(
                 services.filter(is_featured=True)[:3], many=True, context=context
             ).data,
+            'services_section': ServicesSectionSerializer(services_section, context=context).data if services_section else {},
             'about': AboutSectionSerializer(about, context=context).data if about else {},
             'videos': VideoSerializer(videos, many=True, context=context).data,
             'testimonials': TestimonialSerializer(testimonials, many=True, context=context).data,
@@ -628,6 +630,51 @@ def admin_contact_delete(request, pk):
         messages.success(request, 'Contact section deleted successfully!')
         return redirect('admin-contact-list')
     return render(request, 'portfolio/contact_confirm_delete.html', {'contact': contact})
+
+
+# Services Section CRUD
+@staff_member_required
+def admin_services_section_list(request):
+    services_sections = ServicesSection.objects.all().order_by('-is_active', '-created_at')
+    return render(request, 'portfolio/services_section_list.html', {'services_sections': services_sections})
+
+
+@staff_member_required
+def admin_services_section_create(request):
+    if request.method == 'POST':
+        services_section = ServicesSection()
+        services_section.badge_text = request.POST.get('badge_text', '')
+        services_section.title = request.POST.get('title', '')
+        services_section.description = request.POST.get('description', '')
+        services_section.is_active = request.POST.get('is_active') == 'on'
+        services_section.save()
+        messages.success(request, 'Services section created successfully!')
+        return redirect('admin-services-section-list')
+    return render(request, 'portfolio/services_section_form.html', {'action': 'Create'})
+
+
+@staff_member_required
+def admin_services_section_edit(request, pk):
+    services_section = get_object_or_404(ServicesSection, pk=pk)
+    if request.method == 'POST':
+        services_section.badge_text = request.POST.get('badge_text', '')
+        services_section.title = request.POST.get('title', '')
+        services_section.description = request.POST.get('description', '')
+        services_section.is_active = request.POST.get('is_active') == 'on'
+        services_section.save()
+        messages.success(request, 'Services section updated successfully!')
+        return redirect('admin-services-section-list')
+    return render(request, 'portfolio/services_section_form.html', {'services_section': services_section, 'action': 'Edit'})
+
+
+@staff_member_required
+def admin_services_section_delete(request, pk):
+    services_section = get_object_or_404(ServicesSection, pk=pk)
+    if request.method == 'POST':
+        services_section.delete()
+        messages.success(request, 'Services section deleted successfully!')
+        return redirect('admin-services-section-list')
+    return render(request, 'portfolio/services_section_confirm_delete.html', {'services_section': services_section})
 
 
 # Navbar Settings CRUD

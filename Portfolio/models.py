@@ -145,6 +145,22 @@ class ContactSection(models.Model):
         return "Contact Section"
 
 
+class ServicesSection(models.Model):
+    badge_text = models.CharField(max_length=100, default="✦ Specialized Care")
+    title = models.CharField(max_length=300, default="Specialized Medical Services")
+    description = models.TextField(default="Delivering evidence-based treatment with compassion and clinical excellence.")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Services Section"
+        verbose_name_plural = "Services Section"
+
+    def __str__(self):
+        return "Services Section"
+
+
 class NavbarSettings(models.Model):
     # Logo/Brand Info
     logo_icon = models.CharField(max_length=50, default="fas fa-stethoscope", help_text="Font Awesome icon class")

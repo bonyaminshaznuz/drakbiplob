@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.conf import settings
 import os
-from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, NavbarSettings, FooterSettings, SiteSettings
+from .models import HeroSection, Service, AboutSection, Video, Testimonial, Research, ContactSection, ServicesSection, NavbarSettings, FooterSettings, SiteSettings
 
 
 def get_image_url(image_field, request=None):
@@ -145,6 +145,12 @@ class ContactSectionSerializer(serializers.ModelSerializer):
         return None
 
 
+class ServicesSectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServicesSection
+        fields = ['badge_text', 'title', 'description']
+
+
 class NavbarSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = NavbarSettings
@@ -188,6 +194,7 @@ class PortfolioDataSerializer(serializers.Serializer):
     """Combined serializer for all portfolio data"""
     hero = HeroSectionSerializer()
     services = ServiceSerializer(many=True)
+    services_section = ServicesSectionSerializer()
     about = AboutSectionSerializer()
     videos = VideoSerializer(many=True)
     testimonials = TestimonialSerializer(many=True)
