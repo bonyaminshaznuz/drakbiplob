@@ -98,11 +98,14 @@ TEMPLATES = [
 # ======================
 # DATABASE  (🔥 REAL FIX)
 # ======================
+database_url = os.getenv("DATABASE_URL", "sqlite:///db.sqlite3")
+# Only require SSL for PostgreSQL/remote databases, not SQLite
+ssl_required = database_url.startswith("postgres") and not DEBUG
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
+        default=database_url,
         conn_max_age=600,
-        ssl_require=True
+        ssl_require=ssl_required
     )
 }
 
