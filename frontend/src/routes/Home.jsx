@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -72,6 +72,38 @@ const Home = () => {
             setVideoSlideIndex(0);
         }
     }, [videosPerSlide, portfolioData.videos]);
+
+    // Handle hash scrolling after page loads (for direct URL access or navigation from other pages)
+    const location = useLocation();
+    useEffect(() => {
+        if (!loading && location.hash) {
+            // Wait a bit for the DOM to render after loading
+            const scrollToHash = () => {
+                const element = document.querySelector(location.hash);
+                if (element) {
+                    const navbarHeight = 100; // Approximate navbar height
+                    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+                    const offsetPosition = elementPosition - navbarHeight;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                    return true;
+                }
+                return false;
+            };
+
+            // Try scrolling immediately
+            if (!scrollToHash()) {
+                // If element not found, retry with delay
+                const timeoutId = setTimeout(() => {
+                    scrollToHash();
+                }, 300);
+                return () => clearTimeout(timeoutId);
+            }
+        }
+    }, [loading, location.hash]);
 
     if (loading) {
         return (
@@ -146,7 +178,7 @@ const Home = () => {
             <Navbar />
             <main className="min-h-screen bg-softcream">
                 {/* Hero Section - Redesigned & Optimized */}
-                <section className="relative overflow-hidden bg-primary text-white py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28 flex items-center min-h-[600px]">
+                <section id="home" className="relative overflow-hidden bg-primary text-white py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28 flex items-center min-h-[600px]">
 
                     {/* Background Decorative Elements */}
                     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">

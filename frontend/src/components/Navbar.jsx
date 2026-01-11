@@ -36,6 +36,29 @@ const Navbar = () => {
         setIsMobileMenuOpen(false);
     };
 
+    const handleHashClick = (e, hash) => {
+        if (location.pathname === '/') {
+            // If already on home page, smooth scroll to the hash section
+            e.preventDefault();
+            const element = document.querySelector(hash);
+            if (element) {
+                const navbarHeight = 100; // Approximate navbar height
+                const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - navbarHeight;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+            setIsMobileMenuOpen(false);
+        } else {
+            // If on another page, navigate to home with hash (ScrollToTop will handle the scroll)
+            navigate(`/${hash}`);
+            setIsMobileMenuOpen(false);
+        }
+    };
+
     return (
         <>
             {/* Top Contact Bar */}
@@ -76,24 +99,37 @@ const Navbar = () => {
 
                         <nav className="hidden lg:flex items-center gap-1">
                             {navbarData?.menu_items && Array.isArray(navbarData.menu_items) && navbarData.menu_items.length > 0 ? (
-                                navbarData.menu_items.map((item, index) => (
-                                    item.href && item.href.startsWith('/') ? (
-                                        <Link key={index} to={item.href} onClick={item.href === '/' ? handleHomeClick : undefined} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">
-                                            {item.label}
-                                        </Link>
-                                    ) : (
-                                        <a key={index} href={item.href || '#'} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">
-                                            {item.label}
-                                        </a>
-                                    )
-                                ))
+                                navbarData.menu_items.map((item, index) => {
+                                    const isHashLink = item.href && item.href.includes('#');
+                                    const hash = isHashLink ? item.href.split('#')[1] : null;
+                                    
+                                    if (item.href && item.href.startsWith('/') && !isHashLink) {
+                                        return (
+                                            <Link key={index} to={item.href} onClick={item.href === '/' ? handleHomeClick : undefined} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">
+                                                {item.label}
+                                            </Link>
+                                        );
+                                    } else if (isHashLink && hash) {
+                                        return (
+                                            <a key={index} href={item.href || '#'} onClick={(e) => handleHashClick(e, `#${hash}`)} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">
+                                                {item.label}
+                                            </a>
+                                        );
+                                    } else {
+                                        return (
+                                            <a key={index} href={item.href || '#'} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">
+                                                {item.label}
+                                            </a>
+                                        );
+                                    }
+                                })
                             ) : (
                                 <>
                                     <Link to="/" onClick={handleHomeClick} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">Home</Link>
-                                    <a href="/#about" className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">About</a>
-                                    <a href="/#services" className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">Services</a>
-                                    <a href="/#blog" className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">Blog</a>
-                                    <a href="/#contact" className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">Contact</a>
+                                    <a href="/#about" onClick={(e) => handleHashClick(e, '#about')} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">About</a>
+                                    <a href="/#services" onClick={(e) => handleHashClick(e, '#services')} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">Services</a>
+                                    <a href="/#blog" onClick={(e) => handleHashClick(e, '#blog')} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">Blog</a>
+                                    <a href="/#contact" onClick={(e) => handleHashClick(e, '#contact')} className="text-gray-700 hover:text-primary transition px-3 xl:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-cream">Contact</a>
                                 </>
                             )}
                             <Link to="/appointment" className="bg-gradient-to-r from-secondary to-accent text-white px-5 xl:px-7 py-2.5 xl:py-3 rounded-full text-sm font-bold ml-2 xl:ml-4 shadow-lg">
@@ -119,24 +155,37 @@ const Navbar = () => {
                     >
                         <nav className="flex flex-col space-y-2 pt-4 border-t border-gray-200 mt-2">
                             {navbarData?.menu_items && Array.isArray(navbarData.menu_items) && navbarData.menu_items.length > 0 ? (
-                                navbarData.menu_items.map((item, index) => (
-                                    item.href && item.href.startsWith('/') ? (
-                                        <Link key={index} to={item.href} onClick={item.href === '/' ? handleHomeClick : () => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">
-                                            {item.label}
-                                        </Link>
-                                    ) : (
-                                        <a key={index} href={item.href || '#'} onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">
-                                            {item.label}
-                                        </a>
-                                    )
-                                ))
+                                navbarData.menu_items.map((item, index) => {
+                                    const isHashLink = item.href && item.href.includes('#');
+                                    const hash = isHashLink ? item.href.split('#')[1] : null;
+                                    
+                                    if (item.href && item.href.startsWith('/') && !isHashLink) {
+                                        return (
+                                            <Link key={index} to={item.href} onClick={item.href === '/' ? handleHomeClick : () => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">
+                                                {item.label}
+                                            </Link>
+                                        );
+                                    } else if (isHashLink && hash) {
+                                        return (
+                                            <a key={index} href={item.href || '#'} onClick={(e) => { handleHashClick(e, `#${hash}`); }} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">
+                                                {item.label}
+                                            </a>
+                                        );
+                                    } else {
+                                        return (
+                                            <a key={index} href={item.href || '#'} onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">
+                                                {item.label}
+                                            </a>
+                                        );
+                                    }
+                                })
                             ) : (
                                 <>
                                     <Link to="/" onClick={handleHomeClick} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">Home</Link>
-                                    <a href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">About</a>
-                                    <a href="/#services" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">Services</a>
-                                    <a href="/#blog" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">Blog</a>
-                                    <a href="/#contact" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">Contact</a>
+                                    <a href="/#about" onClick={(e) => handleHashClick(e, '#about')} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">About</a>
+                                    <a href="/#services" onClick={(e) => handleHashClick(e, '#services')} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">Services</a>
+                                    <a href="/#blog" onClick={(e) => handleHashClick(e, '#blog')} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">Blog</a>
+                                    <a href="/#contact" onClick={(e) => handleHashClick(e, '#contact')} className="text-gray-700 hover:text-primary transition px-4 py-3 rounded-lg text-sm font-semibold hover:bg-cream block">Contact</a>
                                 </>
                             )}
                             <Link to="/appointment" onClick={() => setIsMobileMenuOpen(false)} className="bg-gradient-to-r from-secondary to-accent text-white px-5 py-3 rounded-full text-sm font-bold shadow-lg w-full mt-2 inline-block text-center hover:from-accent hover:to-secondary">
