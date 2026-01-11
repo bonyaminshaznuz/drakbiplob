@@ -17,6 +17,7 @@ const Home = () => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [researchFilter, setResearchFilter] = useState('all'); // 'all', 'publications', 'papers'
 
     useEffect(() => {
         const fetchPortfolioData = async () => {
@@ -64,6 +65,20 @@ const Home = () => {
     }
 
     const { hero, services, featured_services, services_section, about, videos, testimonials, research, contact } = portfolioData;
+    
+    // Filter research items based on selected filter
+    const filteredResearch = research && research.length > 0 ? research.filter((item) => {
+        if (researchFilter === 'all') {
+            return true;
+        } else if (researchFilter === 'publications') {
+            const pubInfo = (item.publication_info || '').toLowerCase();
+            return pubInfo.includes('publication') || pubInfo.includes('published') || pubInfo.includes('journal');
+        } else if (researchFilter === 'papers') {
+            const pubInfo = (item.publication_info || '').toLowerCase();
+            return pubInfo.includes('paper') || pubInfo.includes('presented') || pubInfo.includes('conference');
+        }
+        return true;
+    }) : [];
 
     return (
         <>
@@ -796,17 +811,38 @@ const Home = () => {
                             </h2>
                         </div>
                         <div className="flex justify-center gap-3 sm:gap-4 md:gap-6 mb-10 sm:mb-12 md:mb-16 flex-wrap px-4">
-                            <button className="text-white bg-primary font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm shadow-soft">All
-                                Research</button>
+                            <button 
+                                onClick={() => setResearchFilter('all')}
+                                className={`font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm transition ${
+                                    researchFilter === 'all' 
+                                        ? 'text-white bg-primary shadow-soft' 
+                                        : 'text-gray-600 hover:text-primary hover:bg-white'
+                                }`}>
+                                All Research
+                            </button>
                             <button
-                                className="text-gray-600 hover:text-primary font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm hover:bg-white transition">Publications</button>
+                                onClick={() => setResearchFilter('publications')}
+                                className={`font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm transition ${
+                                    researchFilter === 'publications' 
+                                        ? 'text-white bg-primary shadow-soft' 
+                                        : 'text-gray-600 hover:text-primary hover:bg-white'
+                                }`}>
+                                Publications
+                            </button>
                             <button
-                                className="text-gray-600 hover:text-primary font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm hover:bg-white transition">Papers</button>
+                                onClick={() => setResearchFilter('papers')}
+                                className={`font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm transition ${
+                                    researchFilter === 'papers' 
+                                        ? 'text-white bg-primary shadow-soft' 
+                                        : 'text-gray-600 hover:text-primary hover:bg-white'
+                                }`}>
+                                Papers
+                            </button>
                         </div>
 
                         <div className="max-w-5xl mx-auto space-y-4 sm:space-y-5">
-                            {research && research.length > 0 ? (
-                                research.map((item) => (
+                            {filteredResearch && filteredResearch.length > 0 ? (
+                                filteredResearch.map((item) => (
                                     <div key={item.id} className="bg-white p-5 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 group">
                                         <div className="flex items-start gap-3 sm:gap-4">
                                             <div
@@ -825,7 +861,11 @@ const Home = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center text-gray-500 py-8">No research publications available at the moment.</div>
+                                <div className="text-center text-gray-500 py-8">
+                                    {research && research.length > 0 
+                                        ? `No ${researchFilter === 'all' ? 'research' : researchFilter} found.` 
+                                        : 'No research publications available at the moment.'}
+                                </div>
                             )}
                         </div>
 
