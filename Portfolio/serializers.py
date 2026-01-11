@@ -185,7 +185,7 @@ class FooterSettingsSerializer(serializers.ModelSerializer):
             'services_title', 'services_links',
             'resources_title', 'resources_links',
             'social_media_title', 'facebook_url', 'twitter_url', 'linkedin_url', 'instagram_url', 'youtube_url',
-            'copyright_text', 'footer_links'
+            'copyright_text'
         ]
 
 

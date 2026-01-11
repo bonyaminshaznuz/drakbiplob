@@ -279,7 +279,6 @@ class FooterSettings(models.Model):
     
     # Footer Bottom
     copyright_text = models.CharField(max_length=300, default="Copyright © 2025 Dr. Abul Khayer (Biplob). All rights reserved.")
-    footer_links = models.JSONField(default=list, help_text="List of footer bottom links (Privacy Policy, Terms, etc.)")
     
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

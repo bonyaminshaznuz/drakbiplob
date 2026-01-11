@@ -212,12 +212,7 @@ class FooterSettingsView(APIView):
                 {'label': 'Book Appointment', 'href': '/appointment'}
             ],
             'social_media_title': 'Follow Us',
-            'copyright_text': 'Copyright © 2025 Dr. Abul Khayer (Biplob). All rights reserved.',
-            'footer_links': [
-                {'label': 'Privacy Policy', 'href': '#'},
-                {'label': 'Terms of Service', 'href': '#'},
-                {'label': 'Cookie Policy', 'href': '#'}
-            ]
+            'copyright_text': 'Copyright © 2025 Dr. Abul Khayer (Biplob). All rights reserved.'
         }, status=status.HTTP_200_OK)
 
 
@@ -815,18 +810,15 @@ def admin_footer_edit(request):
         quick_links_json = request.POST.get('quick_links', '[]')
         services_links_json = request.POST.get('services_links', '[]')
         resources_links_json = request.POST.get('resources_links', '[]')
-        footer_links_json = request.POST.get('footer_links', '[]')
         
         try:
             footer.quick_links = json.loads(quick_links_json) if quick_links_json else []
             footer.services_links = json.loads(services_links_json) if services_links_json else []
             footer.resources_links = json.loads(resources_links_json) if resources_links_json else []
-            footer.footer_links = json.loads(footer_links_json) if footer_links_json else []
         except:
             footer.quick_links = []
             footer.services_links = []
             footer.resources_links = []
-            footer.footer_links = []
         
         footer.services_title = services_title
         footer.resources_title = resources_title
@@ -849,7 +841,6 @@ def admin_footer_edit(request):
         'quick_links_json': json.dumps(footer.quick_links, indent=2) if footer.quick_links else '[]',
         'services_links_json': json.dumps(footer.services_links, indent=2) if footer.services_links else '[]',
         'resources_links_json': json.dumps(footer.resources_links, indent=2) if footer.resources_links else '[]',
-        'footer_links_json': json.dumps(footer.footer_links, indent=2) if footer.footer_links else '[]',
     }
     return render(request, 'portfolio/footer_form.html', footer_data)
 

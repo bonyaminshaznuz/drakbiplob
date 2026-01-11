@@ -197,20 +197,25 @@ const Footer = () => {
                         <p className="text-xs sm:text-sm text-gray-200 text-center md:text-left">
                             {footerData?.copyright_text || 'Copyright © 2025 Dr. Abul Khayer (Biplob). All rights reserved.'}
                         </p>
-                        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm">
-                            {footerData?.footer_links && Array.isArray(footerData.footer_links) && footerData.footer_links.length > 0 ? (
-                                footerData.footer_links.map((link, index) => (
-                                    <a key={index} href={typeof link === 'object' ? (link.href || '#') : '#'} className="text-gray-200 hover:text-accent transition">
-                                        {typeof link === 'object' ? (link.label || link) : link}
-                                    </a>
-                                ))
-                            ) : (
-                                <>
-                                    <a href="#" className="text-gray-200 hover:text-accent transition">Privacy Policy</a>
-                                    <a href="#" className="text-gray-200 hover:text-accent transition">Terms of Service</a>
-                                    <a href="#" className="text-gray-200 hover:text-accent transition">Cookie Policy</a>
-                                </>
-                            )}
+                        <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-1 text-xs sm:text-sm text-gray-200">
+                            <span>Developed by</span>
+                            <a 
+                                href="https://queio.com/" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-secondary hover:text-accent transition-colors"
+                            >
+                                Queio
+                            </a>
+                            <span>and Developer</span>
+                            <a 
+                                href="https://shaznuz.com/" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-secondary hover:text-accent transition-colors"
+                            >
+                                Shaznuz
+                            </a>
                         </div>
                     </div>
                 </div>
