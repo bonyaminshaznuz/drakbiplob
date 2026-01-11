@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AvailableSlot, Appointment, MailSetting
+from .models import AvailableSlot, Appointment, MailSetting, PasswordResetOTP
 
 @admin.register(MailSetting)
 class MailSettingAdmin(admin.ModelAdmin):
@@ -15,8 +15,19 @@ class MailSettingAdmin(admin.ModelAdmin):
 @admin.register(AvailableSlot)
 class AvailableSlotAdmin(admin.ModelAdmin):
     list_display = ('date', 'time', 'is_booked')
-    list_filter = ('date', 'is_booked')
-    search_fields = ('date',)
+
+@admin.register(PasswordResetOTP)
+class PasswordResetOTPAdmin(admin.ModelAdmin):
+    list_display = ('email', 'otp_code', 'created_at', 'expires_at', 'is_used', 'is_valid_display')
+    list_filter = ('is_used', 'created_at')
+    search_fields = ('email', 'otp_code')
+    readonly_fields = ('created_at', 'expires_at')
+    ordering = ['-created_at']
+    
+    def is_valid_display(self, obj):
+        return obj.is_valid()
+    is_valid_display.boolean = True
+    is_valid_display.short_description = 'Is Valid'
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):

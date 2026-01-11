@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load appointment_filters %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Welcome Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 text-white shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+            <div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3">
+                    Welcome back{% if user.get_full_name %}, {{ user.get_full_name }}{% elif user.get_username %}, {{ user.get_username }}{% endif %}!
+                </h1>
+                <p class="text-base sm:text-lg text-blue-100">Here's what's happening with your admin panel today</p>
+            </div>
+            <div class="flex-shrink-0">
+                <div class="h-16 w-16 sm:h-20 sm:w-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user-md text-3xl sm:text-4xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
+        <!-- Total Appointments -->
+        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-calendar-check text-blue-600 text-lg sm:text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{{ statistics.appointments.total }}</h3>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Total Appointments</p>
+        </div>
+
+        <!-- Today's Appointments -->
+        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-shadow">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-calendar-day text-blue-600 text-lg sm:text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">{{ statistics.appointments.today }}</h3>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Today</p>
+        </div>
+
+        <!-- Pending -->
+        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-yellow-100 hover:shadow-xl transition-shadow">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 bg-yellow-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-clock text-yellow-600 text-lg sm:text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-bold text-yellow-600 mb-1">{{ statistics.appointments.pending }}</h3>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Pending</p>
+        </div>
+
+        <!-- Confirmed -->
+        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-green-100 hover:shadow-xl transition-shadow">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 bg-green-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-600 text-lg sm:text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-bold text-green-600 mb-1">{{ statistics.appointments.confirmed }}</h3>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Confirmed</p>
+        </div>
+
+        <!-- Available Slots -->
+        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-purple-100 hover:shadow-xl transition-shadow col-span-2 md:col-span-1">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <div class="h-10 w-10 sm:h-12 sm:w-12 bg-purple-50 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-purple-600 text-lg sm:text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">{{ statistics.slots.available }}</h3>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium">Available Slots</p>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Recent Appointments -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Recent Appointments -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-list text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg sm:text-xl font-bold text-gray-900">Recent Appointments</h2>
+                                <p class="text-xs sm:text-sm text-gray-500">Latest appointment requests</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'admin-appointment-list' %}" class="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+                            View All →
+                        </a>
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    {% if recent_appointments %}
+                        {% for appointment in recent_appointments %}
+                        <div class="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h3 class="text-sm sm:text-base font-bold text-gray-900 truncate">{{ appointment.full_name }}</h3>
+                                        <span class="px-2 py-1 rounded-lg text-xs font-semibold {% if appointment.status == 'confirmed' %}bg-green-100 text-green-700{% elif appointment.status == 'pending' %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500">
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-calendar"></i>
+                                            {{ appointment.slot.date }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-clock"></i>
+                                            {{ appointment.slot.time }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-phone"></i>
+                                            {{ appointment.phone_number }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="p-8 sm:p-12 text-center">
+                            <div class="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-calendar-times text-2xl text-gray-400"></i>
+                            </div>
+                            <p class="text-sm sm:text-base text-gray-500 font-medium">No appointments yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Quick Actions & Summary -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-bolt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Quick Actions</h2>
+                            <p class="text-xs sm:text-sm text-gray-500">Common tasks</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-6 space-y-3">
+                    <a href="{% url 'admin-appointment-list' %}" class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group">
+                        <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm sm:text-base font-semibold text-gray-900">Manage Appointments</p>
+                            <p class="text-xs text-gray-500">View and manage all appointments</p>
+                        </div>
+                    </a>
+                    <a href="{% url 'admin-release-slots' %}" class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors group">
+                        <div class="h-10 w-10 bg-purple-600 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm sm:text-base font-semibold text-gray-900">Release Slots</p>
+                            <p class="text-xs text-gray-500">Manage available time slots</p>
+                        </div>
+                    </a>
+                    <a href="{% url 'admin-portfolio-dashboard' %}" class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors group">
+                        <div class="h-10 w-10 bg-green-600 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm sm:text-base font-semibold text-gray-900">Portfolio</p>
+                            <p class="text-xs text-gray-500">Manage website content</p>
+                        </div>
+                    </a>
+                    <a href="{% url 'admin-mail-settings' %}" class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-yellow-50 hover:bg-yellow-100 transition-colors group">
+                        <div class="h-10 w-10 bg-yellow-600 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm sm:text-base font-semibold text-gray-900">Mail Settings</p>
+                            <p class="text-xs text-gray-500">Configure email settings</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 bg-gray-200 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chart-bar text-gray-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Summary</h2>
+                            <p class="text-xs sm:text-sm text-gray-500">Overview statistics</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                        <span class="text-sm text-gray-600">Upcoming (7 days)</span>
+                        <span class="text-base font-bold text-gray-900">{{ statistics.appointments.upcoming }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                        <span class="text-sm text-gray-600">Total Slots</span>
+                        <span class="text-base font-bold text-gray-900">{{ statistics.slots.total }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                        <span class="text-sm text-gray-600">Booked Slots</span>
+                        <span class="text-base font-bold text-gray-900">{{ statistics.slots.booked }}</span>
+                    </div>
+                    {% if statistics.portfolio.service_count > 0 %}
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                        <span class="text-sm text-gray-600">Portfolio Services</span>
+                        <span class="text-base font-bold text-gray-900">{{ statistics.portfolio.service_count }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-sm text-gray-600">Cancelled</span>
+                        <span class="text-base font-bold text-red-600">{{ statistics.appointments.cancelled }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

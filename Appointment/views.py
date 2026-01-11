@@ -2,11 +2,26 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .models import AvailableSlot, Appointment, MailSetting
+from .models import AvailableSlot, Appointment, MailSetting, PasswordResetOTP
 from .serializers import AvailableSlotSerializer, AppointmentSerializer
 from django.contrib import messages
-from .utils import send_appointment_email
+from .utils import send_appointment_email, send_password_reset_otp
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import views as auth_views
+from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth.hashers import make_password
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+
+User = get_user_model()
+
+# Use staff_member_required with custom login_url
+from functools import wraps
+
+def staff_required_custom_login(view_func):
+    return staff_member_required(view_func, login_url='/accounts/login/')
+
 
 # API Views for Frontend (Public)
 class AvailableSlotListView(generics.ListAPIView):
@@ -62,7 +77,7 @@ class AppointmentDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.delete()
 
 # Template Views for Admin (Protected)
-@staff_member_required
+@staff_required_custom_login
 def admin_appointment_list(request):
     from datetime import date, timedelta
     from django.db.models import Q
@@ -178,7 +193,7 @@ def admin_appointment_list(request):
     }
     return render(request, 'appointment.html', context)
 
-@staff_member_required
+@login_required
 def admin_release_slots(request):
     # Auto-fix inconsistencies: if a slot is marked booked but has no appointment, free it
     AvailableSlot.objects.filter(is_booked=True, appointment__isnull=True).update(is_booked=False)
@@ -238,7 +253,7 @@ def admin_release_slots(request):
     }
     return render(request, 'releasedateandtime.html', context)
 
-@staff_member_required
+@login_required
 def admin_confirm_appointment(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     appointment.status = 'confirmed'
@@ -248,7 +263,7 @@ def admin_confirm_appointment(request, pk):
     send_appointment_email(appointment, 'confirmed')
     return redirect('admin-appointment-list')
 
-@staff_member_required
+@login_required
 def admin_cancel_appointment(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     appointment.status = 'cancelled'
@@ -264,7 +279,7 @@ def admin_cancel_appointment(request, pk):
     send_appointment_email(appointment, 'cancelled')
     return redirect('admin-appointment-list')
 
-@staff_member_required
+@login_required
 def admin_delete_slot(request, pk):
     slot = get_object_or_404(AvailableSlot, pk=pk)
     if slot.is_booked:
@@ -274,7 +289,7 @@ def admin_delete_slot(request, pk):
         messages.success(request, "Slot deleted successfully!")
     return redirect('admin-release-slots')
 
-@staff_member_required
+@login_required
 def admin_bulk_delete_slots(request):
     if request.method == 'POST':
         slot_ids = request.POST.getlist('slot_ids')
@@ -294,7 +309,7 @@ def admin_bulk_delete_slots(request):
             
     return redirect('admin-release-slots')
 
-@staff_member_required
+@login_required
 def admin_mail_settings(request):
     config = MailSetting.objects.first()
     if request.method == 'POST':
@@ -331,6 +346,260 @@ def admin_mail_settings(request):
         return redirect('admin-mail-settings')
 
     return render(request, 'mail_settings.html', {'config': config})
+
+
+# Admin Panel Dashboard/Index
+@login_required
+def admin_panel_index(request):
+    """Admin panel dashboard with welcome message and summary statistics"""
+    from datetime import date, timedelta
+    from django.db.models import Q
+    
+    today = date.today()
+    
+    # Appointment Statistics
+    total_appointments = Appointment.objects.count()
+    today_appointments = Appointment.objects.filter(slot__date=today).count()
+    pending_appointments = Appointment.objects.filter(status='pending').count()
+    confirmed_appointments = Appointment.objects.filter(status='confirmed').count()
+    cancelled_appointments = Appointment.objects.filter(status='cancelled').count()
+    
+    # Slot Statistics
+    total_slots = AvailableSlot.objects.count()
+    available_slots = AvailableSlot.objects.filter(is_booked=False).count()
+    booked_slots = AvailableSlot.objects.filter(is_booked=True).count()
+    
+    # Upcoming Appointments (next 7 days)
+    week_end = today + timedelta(days=7)
+    upcoming_appointments = Appointment.objects.filter(slot__date__range=[today, week_end], status__in=['pending', 'confirmed']).count()
+    
+    # Recent Appointments (last 5)
+    recent_appointments = Appointment.objects.select_related('slot').order_by('-created_at')[:5]
+    
+    # Portfolio Statistics (if Portfolio app is installed)
+    try:
+        from Portfolio.models import HeroSection, Service, Video, Testimonial
+        portfolio_stats = {
+            'hero_count': HeroSection.objects.count(),
+            'service_count': Service.objects.count(),
+            'video_count': Video.objects.count(),
+            'testimonial_count': Testimonial.objects.count(),
+        }
+    except ImportError:
+        portfolio_stats = {
+            'hero_count': 0,
+            'service_count': 0,
+            'video_count': 0,
+            'testimonial_count': 0,
+        }
+    
+    context = {
+        'user': request.user,
+        'today': today,
+        'statistics': {
+            'appointments': {
+                'total': total_appointments,
+                'today': today_appointments,
+                'pending': pending_appointments,
+                'confirmed': confirmed_appointments,
+                'cancelled': cancelled_appointments,
+                'upcoming': upcoming_appointments,
+            },
+            'slots': {
+                'total': total_slots,
+                'available': available_slots,
+                'booked': booked_slots,
+            },
+            'portfolio': portfolio_stats,
+        },
+        'recent_appointments': recent_appointments,
+    }
+    
+    return render(request, 'admin_panel_index.html', context)
+
+
+# Admin Login View
+@require_http_methods(["GET", "POST"])
+def admin_login(request):
+    """Custom login view for admin panel - staff only"""
+    # If user is already logged in and is staff, redirect to dashboard
+    if request.user.is_authenticated and request.user.is_staff:
+        next_url = request.GET.get('next', 'admin-panel-index')
+        return redirect(next_url)
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        
+        if not username or not password:
+            messages.error(request, 'Please provide both username and password.')
+            return render(request, 'login.html')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            if user.is_staff:
+                login(request, user)
+                next_url = request.GET.get('next', 'admin-panel-index')
+                messages.success(request, f'Welcome back, {user.get_full_name() or user.get_username()}!')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'Access denied. Staff privileges required.')
+                return render(request, 'login.html')
+        else:
+            messages.error(request, 'Invalid username or password.')
+            return render(request, 'login.html')
+    
+    return render(request, 'login.html')
+
+
+# Password Reset Views
+@require_http_methods(["GET", "POST"])
+def forgot_password(request):
+    """Step 1: Request password reset - enter email"""
+    if request.user.is_authenticated:
+        return redirect('admin-panel-index')
+    
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        
+        if not email:
+            messages.error(request, 'Please enter your email address.')
+            return render(request, 'forgot_password.html')
+        
+        # Check if user exists and is staff (case-insensitive email lookup)
+        try:
+            user = User.objects.get(email__iexact=email, is_staff=True)
+        except User.DoesNotExist:
+            # Don't reveal if email exists or not (security best practice)
+            messages.success(request, 'If an account exists with this email, an OTP code has been sent.')
+            return render(request, 'forgot_password.html')
+        
+        # Send OTP
+        success, otp = send_password_reset_otp(email)
+        
+        if success and otp:
+            # Store email in session for next step
+            request.session['reset_email'] = email
+            messages.success(request, f'OTP code has been sent to {email}. Please check your email.')
+            return redirect('verify-otp')
+        else:
+            messages.error(request, 'Failed to send OTP. Please try again later.')
+            return render(request, 'forgot_password.html')
+    
+    return render(request, 'forgot_password.html')
+
+
+@require_http_methods(["GET", "POST"])
+def verify_otp(request):
+    """Step 2: Verify OTP code"""
+    if request.user.is_authenticated:
+        return redirect('admin-panel-index')
+    
+    # Check if email is in session
+    email = request.session.get('reset_email')
+    if not email:
+        messages.error(request, 'Please start the password reset process again.')
+        return redirect('forgot-password')
+    
+    if request.method == 'POST':
+        otp_code = request.POST.get('otp', '').strip()
+        
+        if not otp_code or len(otp_code) != 6:
+            messages.error(request, 'Please enter a valid 6-digit OTP code.')
+            return render(request, 'verify_otp.html', {'email': email})
+        
+        # Verify OTP
+        try:
+            otp = PasswordResetOTP.objects.get(
+                email=email,
+                otp_code=otp_code,
+                is_used=False
+            )
+            
+            if otp.is_valid():
+                # Store OTP ID in session for password reset
+                request.session['reset_otp_id'] = otp.id
+                messages.success(request, 'OTP verified successfully. Please set your new password.')
+                return redirect('reset-password')
+            else:
+                messages.error(request, 'OTP has expired. Please request a new one.')
+                del request.session['reset_email']
+                return redirect('forgot-password')
+                
+        except PasswordResetOTP.DoesNotExist:
+            messages.error(request, 'Invalid OTP code. Please try again.')
+            return render(request, 'verify_otp.html', {'email': email})
+    
+    return render(request, 'verify_otp.html', {'email': email})
+
+
+@require_http_methods(["GET", "POST"])
+def reset_password(request):
+    """Step 3: Set new password"""
+    if request.user.is_authenticated:
+        return redirect('admin-panel-index')
+    
+    # Check if OTP is verified
+    email = request.session.get('reset_email')
+    otp_id = request.session.get('reset_otp_id')
+    
+    if not email or not otp_id:
+        messages.error(request, 'Please complete the OTP verification first.')
+        return redirect('forgot-password')
+    
+    try:
+        otp = PasswordResetOTP.objects.get(id=otp_id, email=email, is_used=False)
+        if not otp.is_valid():
+            messages.error(request, 'OTP has expired. Please start the process again.')
+            del request.session['reset_email']
+            del request.session['reset_otp_id']
+            return redirect('forgot-password')
+    except PasswordResetOTP.DoesNotExist:
+        messages.error(request, 'Invalid session. Please start the process again.')
+        del request.session['reset_email']
+        del request.session['reset_otp_id']
+        return redirect('forgot-password')
+    
+    if request.method == 'POST':
+        password = request.POST.get('password', '').strip()
+        password_confirm = request.POST.get('password_confirm', '').strip()
+        
+        if not password or not password_confirm:
+            messages.error(request, 'Please fill in all fields.')
+            return render(request, 'reset_password.html')
+        
+        if password != password_confirm:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'reset_password.html')
+        
+        if len(password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+            return render(request, 'reset_password.html')
+        
+        # Update password
+        try:
+            user = User.objects.get(email__iexact=email, is_staff=True)
+            user.set_password(password)
+            user.save()
+            
+            # Mark OTP as used
+            otp.mark_as_used()
+            
+            # Clear session
+            del request.session['reset_email']
+            del request.session['reset_otp_id']
+            
+            messages.success(request, 'Password has been reset successfully. You can now login with your new password.')
+            return redirect('admin-login')
+            
+        except User.DoesNotExist:
+            messages.error(request, 'User not found.')
+            del request.session['reset_email']
+            del request.session['reset_otp_id']
+            return redirect('forgot-password')
+    
+    return render(request, 'reset_password.html')
 
 
 # Custom Error Handlers

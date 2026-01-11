@@ -1,6 +1,13 @@
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta
+import random
+import string
+
+User = get_user_model()
 
 class AvailableSlot(models.Model):
     date = models.DateField()
@@ -79,3 +86,55 @@ class MailSetting(models.Model):
             'from_email': self.default_from_email,
             'admin_email': self.admin_email,
         }
+
+class PasswordResetOTP(models.Model):
+    """Model to store OTP codes for password reset"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_otps')
+    email = models.EmailField()
+    otp_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['email', 'otp_code', 'is_used']),
+        ]
+    
+    def __str__(self):
+        return f"OTP for {self.email} - {self.otp_code}"
+    
+    @classmethod
+    def generate_otp(cls, user_email):
+        """Generate a new OTP for password reset"""
+        # Delete old unused OTPs for this email
+        cls.objects.filter(email=user_email, is_used=False).delete()
+        
+        # Generate 6-digit OTP
+        otp_code = ''.join(random.choices(string.digits, k=6))
+        
+        # Get user by email (case-insensitive lookup)
+        try:
+            user = User.objects.get(email__iexact=user_email, is_staff=True)
+        except User.DoesNotExist:
+            return None
+        
+        # Create OTP (expires in 10 minutes)
+        expires_at = timezone.now() + timedelta(minutes=10)
+        otp = cls.objects.create(
+            user=user,
+            email=user_email,
+            otp_code=otp_code,
+            expires_at=expires_at
+        )
+        return otp
+    
+    def is_valid(self):
+        """Check if OTP is valid (not used and not expired)"""
+        return not self.is_used and timezone.now() < self.expires_at
+    
+    def mark_as_used(self):
+        """Mark OTP as used"""
+        self.is_used = True
+        self.save()

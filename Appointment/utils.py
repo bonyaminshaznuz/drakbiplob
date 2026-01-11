@@ -2,7 +2,7 @@ from mailjet_rest import Client
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
-from .models import MailSetting
+from .models import MailSetting, PasswordResetOTP
 
 
 def _get_mail_config():
@@ -148,3 +148,79 @@ def send_appointment_email(appointment, event_type):
         return False
     
     return True
+
+
+def send_password_reset_otp(user_email):
+    """
+    Generate and send OTP code for password reset via email using Mailjet API.
+    Returns (success: bool, otp_object: PasswordResetOTP or None)
+    """
+    try:
+        # Generate OTP
+        otp = PasswordResetOTP.generate_otp(user_email)
+        if not otp:
+            return False, None
+        
+        # Get email configuration
+        config = _get_mail_config()
+        
+        if not config or not config.get('api_key') or not config.get('api_secret'):
+            print("ERROR: Mailjet API configuration not found or incomplete!")
+            return False, None
+        
+        from_email = config.get('from_email', 'Dr. Abul Khayer (Biplob) <your-email@gmail.com>')
+        
+        # Prepare email content
+        subject = "Password Reset OTP - Admin Panel"
+        
+        # Create email context
+        context = {
+            'otp_code': otp.otp_code,
+            'user': otp.user,
+            'expires_in_minutes': 10,
+        }
+        
+        # Try to render HTML template, fallback to plain text
+        try:
+            html_message = render_to_string('emails/password_reset_otp.html', context)
+            plain_message = strip_tags(html_message)
+        except Exception as e:
+            print(f"OTP email template error: {e}")
+            # Fallback plain text message
+            plain_message = f"""
+Password Reset Request - Admin Panel
+
+Hello {otp.user.get_full_name() or otp.user.get_username()},
+
+You have requested to reset your password for the Admin Panel.
+
+Your OTP code is: {otp.otp_code}
+
+This code will expire in 10 minutes.
+
+If you did not request this password reset, please ignore this email.
+
+Best regards,
+Dr. Biplob Admin Panel
+            """.strip()
+            html_message = None
+        
+        # Send email
+        user_name = otp.user.get_full_name() or otp.user.get_username()
+        success = _send_email_via_mailjet(
+            config, from_email, user_email, user_name,
+            subject, html_message, plain_message
+        )
+        
+        if not success:
+            print(f"Failed to send OTP email to: {user_email}")
+            otp.delete()  # Delete OTP if email sending failed
+            return False, None
+        
+        return True, otp
+        
+    except Exception as e:
+        print(f"CRITICAL OTP EMAIL ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        return False, None
