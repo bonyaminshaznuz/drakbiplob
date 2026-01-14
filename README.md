@@ -256,7 +256,7 @@ This project is private and proprietary.
 
 ## 👤 Author
 
-Dr. Akbiplob Portfolio & Appointment System
+Kazi Bony Amin || Dr. Akbiplob Portfolio & Appointment System
 
 ## 📞 Support
 
